@@ -1,2 +1,17 @@
 ---
-# tasks file for hmpps-delius-core-oracledb-bootstrap
+
+- name: Get our instance facts
+  ec2_metadata_facts:
+
+- name: Gather installation facts
+  include: check-installation.yml
+
+- block:
+    - name: Define our service user
+      set_fact:
+        service_user_name: "oracle"
+  when: not service_user_name|default(false)
+
+- name: Reconfigure our config that was set during ami build
+  include: reconfigure-instance.yml
+
