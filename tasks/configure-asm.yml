@@ -1,17 +1,18 @@
 ---
 
-- name: run bash shell script do discover asm disks
-  shell: "~/discover-asm-disks.sh"
-  register: command_result
-  become: true
-
 - name: Create our tmp dir for this as oracle because ansible
   file:
     state: directory
     path: "/home/{{ service_user_name }}/.ansible/tmp"
     owner: "{{ service_user_name }}"
 
+
 - block:
+    - name: run bash shell script do discover asm disks
+      shell: "~/discover-asm-disks.sh"
+      register: command_result
+      become: true
+
     - name: configure Grid Infrastructure for a Stand-Alone Server
       shell: "{{ oracle_grid_oracle_home }}/perl/bin/perl -I {{ oracle_grid_oracle_home }}/perl/lib -I {{ oracle_grid_oracle_home }}/crs/install {{ oracle_grid_oracle_home }}/crs/install/roothas.pl"
       register: config_result
