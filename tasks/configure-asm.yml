@@ -24,7 +24,7 @@
 
     - name: run config of asm as oracle
       become: yes
-      become_user: "{{ rdbms_service_user.name }}"
+      become_user: "{{ service_user_name }}"
       shell: "{{ oracle_grid_oracle_home }}/bin/asmca
                 -silent
                 -configureASM
@@ -35,4 +35,4 @@
                 -diskList /dev/oracleasm/disks/ASMDISK1
                 -redundancy EXTERNAL"
       register: asm_result
-  when: not grid_installed|default(false)
+  when: grid_installed|default(false)

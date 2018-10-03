@@ -19,3 +19,6 @@
 - name: Reconfigure our config that was set during ami build
   include: reconfigure-instance.yml
 
+- name: Configure and startup asm
+  include: configure-asm.yml
+  when: grid_installed
