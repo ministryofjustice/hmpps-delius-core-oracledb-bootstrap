@@ -5,6 +5,12 @@
   register: command_result
   become: true
 
+- name: Create our tmp dir for this as oracle because ansible
+  file:
+    state: directory
+    path: "/home/{{ service_user_name }}/.ansible/tmp"
+    owner: "{{ service_user_name }}"
+
 - block:
     - name: configure Grid Infrastructure for a Stand-Alone Server
       shell: "{{ oracle_grid_oracle_home }}/perl/bin/perl -I {{ oracle_grid_oracle_home }}/perl/lib -I {{ oracle_grid_oracle_home }}/crs/install {{ oracle_grid_oracle_home }}/crs/install/roothas.pl"
@@ -35,4 +41,4 @@
                 -diskList /dev/oracleasm/disks/ASMDISK1
                 -redundancy EXTERNAL"
       register: asm_result
-  when: grid_installed|default(false)
+  when: not grid_installed|default(false)
