@@ -1,6 +1,9 @@
 ---
 
- name: Find out how much system memory we have
+- name: Update our service_users profile so that the ORACLE_HOSTNAME variable is correct and resolves
+  include: update-service-user.yml
+
+- name: Find out how much system memory we have
   set_fact:
     system_memory_kb: "{{ ((ansible_memtotal_mb/10)*9)*1024|int }}"
   ignore_errors: true

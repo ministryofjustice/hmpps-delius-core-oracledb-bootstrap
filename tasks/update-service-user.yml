@@ -1,0 +1,21 @@
+---
+
+- block:
+    - name: Set system hostname
+      set_fact:
+        system_hostname: "{{ ansible_env.HMPPS_FQDN }}"
+  when: ansible_env.HMPPS_FQDN|default(false)
+
+- block:
+    - name: Set system hostname
+      set_fact:
+        system_hostname: "{{ ansible_env.HOSTNAME }}"
+  when: ansible_env.HMPPS_FQDN|default(false) == false
+
+
+- name: Update our service users .bash_profile
+  lineinefile:
+    path: "/home/{{ service_user_name }}/.bash_profile"
+    regexp: '^export ORACLE_HOSTNAME=localhost'
+    line: "export ORACLE_HOSTNAME={{ system_hostname }}"
+  ignore_errors: true # Incase the file doesn't exist
