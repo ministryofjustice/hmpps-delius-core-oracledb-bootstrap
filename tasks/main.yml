@@ -1,5 +1,9 @@
 ---
 
+- name: Load in our vars
+  include_vars:
+    file: main.yml
+
 - name: Get our instance facts
   ec2_metadata_facts:
 

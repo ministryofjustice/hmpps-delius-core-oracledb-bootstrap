@@ -1,2 +1,7 @@
 ---
-# vars file for hmpps-delius-core-oracledb-bootstrap
+
+mount_point: "/u01"
+oracle_database_oracle_base: "{{ mount_point }}/app/oracle"
+oracle_database_oracle_home: "{{ oracle_database_oracle_base }}/product/11.2.0.4/db"
+oracle_grid_oracle_base: "{{ mount_point }}/app/grid"
+oracle_grid_oracle_home: "{{ oracle_grid_oracle_base }}/product/11.2.0.4/grid"

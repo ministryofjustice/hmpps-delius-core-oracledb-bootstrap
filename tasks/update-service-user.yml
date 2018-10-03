@@ -12,10 +12,9 @@
         system_hostname: "{{ ansible_env.HOSTNAME }}"
   when: ansible_env.HMPPS_FQDN|default(false) == false
 
-
-- name: Update our service users .bash_profile
-  lineinefile:
+- name: "Update our service users .bash_profile"
+  lineinfile:
     path: "/home/{{ service_user_name }}/.bash_profile"
     regexp: '^export ORACLE_HOSTNAME=localhost'
     line: "export ORACLE_HOSTNAME={{ system_hostname }}"
-  ignore_errors: true # Incase the file doesn't exist
+  ignore_errors: true
