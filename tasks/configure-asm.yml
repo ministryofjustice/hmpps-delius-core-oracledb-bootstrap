@@ -1,9 +1,12 @@
 ---
 
+# This sometimes fails as the disks are not ready, so we loop over it until all we get back is that the driver config is written
 - name: run bash shell script do discover asm disks
   shell: "~/discover-asm-disks.sh"
   register: command_result
-  become: true
+  retries: 5
+  delay: 60
+  until: "command_result.stdout == 'Writing Oracle ASM library driver configuration: done'"
 
 - name: configure Grid Infrastructure for a Stand-Alone Server
   shell: "{{ oracle_grid_oracle_home }}/perl/bin/perl -I {{ oracle_grid_oracle_home }}/perl/lib -I {{ oracle_grid_oracle_home }}/crs/install {{ oracle_grid_oracle_home }}/crs/install/roothas.pl"
@@ -20,10 +23,6 @@
   become: yes
   become_user: "{{ service_user_name }}"
   shell: "{{ oracle_grid_oracle_home }}/bin/netca -silent -responsefile /tmp/netca.rsp"
-
-- name: Pause so our listener can startup
-  pause:
-    seconds: 30
 
 - name: run config of asm as oracle
   become: yes
