@@ -1,15 +1,13 @@
 ---
 
-- block:
-    - name: preparing database template
-      template:
-        src: "{{ role_path }}/templates/dbca.rsp.j2"
-        dest: "/tmp/dbca.rsp"
-        owner: "{{ service_user_name }}"
+- name: preparing database template
+  template:
+    src: "{{ role_path }}/templates/dbca.rsp.j2"
+    dest: "/tmp/dbca.rsp"
+    owner: "{{ service_user_name }}"
 
-    - name: run database configuration assistant
-      shell: "{{ oracle_database_oracle_home }}/bin/dbca -silent  -responseFile /tmp/dbca.rsp"
-      become: yes
-      become_user: "{{ service_user_name }}"
-      register: command_result
-  when: not oradb_installed|default(false)
+- name: run database configuration assistant
+  shell: "{{ oracle_database_oracle_home }}/bin/dbca -silent  -responseFile /tmp/dbca.rsp"
+  become: yes
+  become_user: "{{ service_user_name }}"
+  register: command_result

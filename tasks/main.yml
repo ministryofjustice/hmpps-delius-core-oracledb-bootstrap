@@ -4,26 +4,40 @@
   include_vars:
     file: main.yml
 
-- name: Get our instance facts
-  ec2_metadata_facts:
-
-- name: Gather installation facts
-  include: check-installation.yml
-
 - block:
     - name: Define our service user
       set_fact:
         service_user_name: "oracle"
   when: not service_user_name|default(false)
 
+- name: Get our instance facts
+  ec2_metadata_facts:
+
+- name: Gather installation facts
+  include: check-installation.yml
+
 - name: Reconfigure our config that was set during ami build
   include: reconfigure-instance.yml
 
-- name: Configure and startup asm
-  include: configure-asm.yml
+- block:
+    - name: Configure and startup asm
+      include: configure-asm.yml
 
-- name: Configure our flash disk groups
-  include: configure-disk-groups.yml
+    - name: Configure our flash disk groups
+      include: configure-disk-groups.yml
 
-- name: Configure out database
-  include: create-database.yml
+    - name: Create our check file so we don't run this again
+      file:
+        path: "/home/{{ service_user_name }}/.grid_installed"
+        state: touch
+  when: not grid_installed|default(false)
+
+- block:
+    - name: Configure out database
+      include: create-database.yml
+
+    - name: Create our check file so we don't run this again
+      file:
+        path: "/home/{{ service_user_name }}/.oradb_installed"
+        state: touch
+  when: not oradb_installed|default(false)

@@ -1,19 +1,20 @@
 ---
 
 - name: validate oracle grid is already installed
-  stat: path="{{ oracle_grid_oracle_home }}/bin/sqlplus"
-  register: sqlplus
-  become: yes
+  stat:
+    path: "/home/{{ service_user_name }}/.grid_installed"
+  register: grid_install_check_file
 
 - set_fact:
     grid_installed: true
-  when: sqlplus.stat.exists
+  when: grid_install_check_file.stat.exists
 
 - name: validate oracle database is already installed
-  stat: path="{{ oracle_database_oracle_home }}/bin/sqlplus"
-  register: sqlplus
+  stat:
+    path: "/home/{{ service_user_name }}/.oradb_installed"
+  register: oradb_install_check_file
   become: yes
 
 - set_fact:
     oradb_installed: true
-  when: sqlplus.stat.exists
+  when: oradb_install_check_file.stat.exists

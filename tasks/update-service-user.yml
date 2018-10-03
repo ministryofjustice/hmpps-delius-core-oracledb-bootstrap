@@ -19,3 +19,9 @@
     backrefs: true
     line: "export ORACLE_HOSTNAME={{ system_hostname }}"
   ignore_errors: true
+
+- name: Create our tmp dir for this as oracle because ansible
+  file:
+    state: directory
+    path: "/home/{{ service_user_name }}/.ansible/tmp"
+    owner: "{{ service_user_name }}"
