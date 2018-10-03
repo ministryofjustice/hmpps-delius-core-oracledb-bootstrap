@@ -1,0 +1,39 @@
+---
+
+# This sometimes fails as the disks are not ready, so we loop over it until all we get back is that the driver config is written
+- name: run bash shell script do discover asm disks
+  shell: "~/discover-asm-disks.sh"
+  register: command_result
+  retries: 5
+  delay: 60
+  until: "command_result.stdout == 'Writing Oracle ASM library driver configuration: done'"
+
+- name: configure Grid Infrastructure for a Stand-Alone Server
+  shell: "{{ oracle_grid_oracle_home }}/perl/bin/perl -I {{ oracle_grid_oracle_home }}/perl/lib -I {{ oracle_grid_oracle_home }}/crs/install {{ oracle_grid_oracle_home }}/crs/install/roothas.pl"
+  register: config_result
+  failed_when: config_result.stderr_lines == ""
+  become: true
+
+- name: preparing listener template
+  template:
+    src: "{{ role_path }}/templates/netca.rsp.j2"
+    dest: "/tmp/netca.rsp"
+
+- name: configure listener
+  become: yes
+  become_user: "{{ service_user_name }}"
+  shell: "{{ oracle_grid_oracle_home }}/bin/netca -silent -responsefile /tmp/netca.rsp"
+
+- name: run config of asm as oracle
+  become: yes
+  become_user: "{{ service_user_name }}"
+  shell: "{{ oracle_grid_oracle_home }}/bin/asmca
+            -silent
+            -configureASM
+            -sysAsmPassword {{ sys_asm_password|default('d3l1u5ag41n') }}
+            -asmsnmpPassword {{ snmp_asm_password|default('d3l1u5ag41n') }}
+            -diskString '/dev/oracleasm/disks/ASMDISK*'
+            -diskGroupName DATA
+            -diskList /dev/oracleasm/disks/ASMDISK1
+            -redundancy EXTERNAL"
+  register: asm_result

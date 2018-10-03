@@ -1,0 +1,19 @@
+---
+
+- name: Update our service_users profile so that the ORACLE_HOSTNAME variable is correct and resolves
+  include: update-service-user.yml
+
+- name: Find out how much system memory we have
+  set_fact:
+    system_memory_kb: "{{ ((ansible_memtotal_mb/10)*9)*1024|int }}"
+  ignore_errors: true
+
+- name: Update oracle memory limits
+  lineinfile:
+    dest: /etc/security/limits.conf
+    regexp: "{{ service_user_name }} {{ item.limit }} {{ item.type}}"
+    line: "{{ service_user_name }} {{ item.limit }} {{ item.type}} {{ item.value }}"
+  with_items:
+    - { limit: 'soft', type: memlock, value: '{{ system_memory_kb|int }}' }
+    - { limit: 'hard', type: memlock, value: '{{ system_memory_kb|int }}' }
+

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+export ORACLE_SID=+ASM
+export ORAENV_ASK=NO
+. oraenv
+sqlplus -s "/ as sysasm"<< EOF
+CREATE DISKGROUP FLASH EXTERNAL REDUNDANCY DISK '/dev/oracleasm/disks/ASMDISK2';
+exit
+EOF

@@ -1,0 +1,27 @@
+---
+
+- block:
+    - name: Set system hostname
+      set_fact:
+        system_hostname: "{{ ansible_env.HMPPS_FQDN }}"
+  when: ansible_env.HMPPS_FQDN|default(false)
+
+- block:
+    - name: Set system hostname
+      set_fact:
+        system_hostname: "{{ ansible_env.HOSTNAME }}"
+  when: ansible_env.HMPPS_FQDN|default(false) == false
+
+- name: "Update our service users .bash_profile"
+  lineinfile:
+    path: "/home/{{ service_user_name }}/.bash_profile"
+    regexp: "^export ORACLE_HOSTNAME=localhost"
+    backrefs: true
+    line: "export ORACLE_HOSTNAME={{ system_hostname }}"
+  ignore_errors: true
+
+- name: Create our tmp dir for this as oracle because ansible
+  file:
+    state: directory
+    path: "/home/{{ service_user_name }}/.ansible/tmp"
+    owner: "{{ service_user_name }}"

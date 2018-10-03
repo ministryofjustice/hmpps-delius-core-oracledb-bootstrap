@@ -1,0 +1,20 @@
+---
+
+- name: validate oracle grid is already installed
+  stat:
+    path: "/home/{{ service_user_name }}/.grid_installed"
+  register: grid_install_check_file
+
+- set_fact:
+    grid_installed: true
+  when: grid_install_check_file.stat.exists
+
+- name: validate oracle database is already installed
+  stat:
+    path: "/home/{{ service_user_name }}/.oradb_installed"
+  register: oradb_install_check_file
+  become: yes
+
+- set_fact:
+    oradb_installed: true
+  when: oradb_install_check_file.stat.exists
