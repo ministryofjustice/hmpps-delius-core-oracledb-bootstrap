@@ -21,8 +21,9 @@
 
 - name: Configure and startup asm
   include: configure-asm.yml
-  when: grid_installed
 
 - name: Configure our flash disk groups
   include: configure-disk-groups.yml
-  when:
+
+- name: Configure out database
+  include: create-database.yml

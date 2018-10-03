@@ -1,16 +1,17 @@
 ---
 
-- name: preparing database installation template
-  template:
-    src: "{{ role_path }}/templates/create-flash.sh.j2"
-    dest: /tmp/create-flash.sh
-    mode: u+x
-    owner: "{{ service_user_name }}"
+- block:
+    - name: preparing database installation template
+      template:
+        src: "{{ role_path }}/templates/create-flash.sh.j2"
+        dest: /tmp/create-flash.sh
+        mode: u+x
+        owner: "{{ service_user_name }}"
 
-- name: Create FRA recovery disk group
-  shell: ". ~/.bash_profile && /tmp/create-flash.sh"
-  become: yes
-  become_user: "{{ service_user_name }}"
-  register: sql_result
-  failed_when: "'Diskgroup created.' not in sql_result.stdout_lines"
-
+    - name: Create FRA recovery disk group
+      shell: ". ~/.bash_profile && /tmp/create-flash.sh"
+      become: yes
+      become_user: "{{ service_user_name }}"
+      register: sql_result
+      failed_when: "'Diskgroup created.' not in sql_result.stdout_lines"
+  when: not grid_installed|default(false)

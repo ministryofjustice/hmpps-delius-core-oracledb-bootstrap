@@ -15,6 +15,7 @@
 - name: "Update our service users .bash_profile"
   lineinfile:
     path: "/home/{{ service_user_name }}/.bash_profile"
-    regexp: 'export ORACLE_HOSTNAME=localhost'
+    regexp: "^export ORACLE_HOSTNAME=localhost"
+    backrefs: true
     line: "export ORACLE_HOSTNAME={{ system_hostname }}"
   ignore_errors: true
