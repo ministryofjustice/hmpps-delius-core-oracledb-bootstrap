@@ -5,7 +5,8 @@
     path: "/home/{{ service_user_name }}/.grid_installed"
   register: grid_install_check_file
 
-- set_fact:
+- name: Is grid installed
+  set_fact:
     grid_installed: true
   when: grid_install_check_file.stat.exists
 
@@ -15,6 +16,7 @@
   register: oradb_install_check_file
   become: yes
 
-- set_fact:
+- name: Is oradb installed
+  set_fact:
     oradb_installed: true
   when: oradb_install_check_file.stat.exists
