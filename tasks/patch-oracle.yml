@@ -1,0 +1,53 @@
+---
+
+- name: Backup Our OPatch Files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ item }}.bak"
+    remote_src: true
+  with_items:
+    - "{{ oracle_grid_oracle_home }}/OPatch"
+    - "{{ oracle_database_oracle_home }}/OPatch"
+
+- name: Remove our old OPatch files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ oracle_grid_oracle_home }}/OPatch"
+    - "{{ oracle_database_oracle_home }}/OPatch"
+
+- name: Copy opatch utility to grid home
+  copy:
+    remote_src: yes
+    src: "{{ mount_point }}/software/11gR/patches/p6880880_112000_Linux-x86-64.zip"
+    dest: "{{ oracle_grid_oracle_home }}"
+
+- name: Copy opatch utility to database home
+  copy: 
+    src: "{{ mount_point }}/software/11gR/patches/p6880880_112000_Linux-x86-64.zip"
+    dest: "{{ oracle_database_oracle_home }}"
+    remote_src: yes
+
+- name: Unpack opatch utility in grid home
+  unarchive:
+    src: "{{ oracle_grid_oracle_home }}/p6880880_112000_Linux-x86-64.zip"
+    dest: "{{ oracle_grid_oracle_home }}"
+    owner: "{{ service_user_name }}"
+    remote_src: yes
+
+- name: Unpack opatch utility in database home
+  unarchive:
+    src: "{{ oracle_database_oracle_home }}/p6880880_112000_Linux-x86-64.zip"
+    dest: "{{ oracle_database_oracle_home }}"
+    owner: "{{ service_user_name }}"
+    remote_src: yes
+
+- name: Remove our patch archives now we have unpacked them
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ mount_point }}/software/11gR/patches/p6880880_112000_Linux-x86-64.zip"
+    - "{{ oracle_grid_oracle_home }}/p6880880_112000_Linux-x86-64.zip"
+    - "{{ oracle_database_oracle_home }}/p6880880_112000_Linux-x86-64.zip}}"
