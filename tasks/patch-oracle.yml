@@ -1,18 +1,11 @@
 ---
 
 - name: Backup Our OPatch Files
-  copy:
-    src: "{{ item }}"
-    dest: "{{ item }}.bak"
-    remote_src: true
-  with_items:
-    - "{{ oracle_grid_oracle_home }}/OPatch"
-    - "{{ oracle_database_oracle_home }}/OPatch"
-
-- name: Remove our old OPatch files
-  file:
+  archive:
     path: "{{ item }}"
-    state: absent
+    dest: "../{{ item|basename }}.tar.gz"
+    remote_src: true
+    remove: true
   with_items:
     - "{{ oracle_grid_oracle_home }}/OPatch"
     - "{{ oracle_database_oracle_home }}/OPatch"
