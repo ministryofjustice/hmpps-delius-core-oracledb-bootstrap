@@ -1,9 +1,10 @@
 ---
 
-- name: preparing psu template
-  template:
-    src: "{{ role_path}}/templates/ocm.rsp.j2"
+- name: Copy the PSU ocm response file to /tmp
+  copy:
+    src: "{{ role_path }}/files/ocm.rsp"
     dest: "/tmp/ocm.rsp"
+    remote_src: true
 
 - name: Apply PSU as root user
   shell: "export PATH=$PATH:/tmp;
