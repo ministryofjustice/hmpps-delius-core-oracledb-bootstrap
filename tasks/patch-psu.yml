@@ -6,59 +6,70 @@
     dest: "/tmp/ocm.rsp"
     remote_src: true
 
-- name: Apply PSU as root user
-  shell: "export PATH=$PATH:/tmp;
-          touch /tmp/fuser;
-          {{ oracle_grid_oracle_home }}/OPatch/opatch auto {{ oracle_patch_installer_directory }}/27726505/27475913
-            -ocmrf /tmp/ocm.rsp"
-  chdir: "{{ oracle_patch_installer_directory }}/27726505/27475913"
-  register: patch_result
-  failed_when: "'opatch auto succeeded.' not in patch_result.stdout_lines"
+- block:
+    - name: Apply PSU as root user
+      raw: "export PATH=$PATH:/tmp;
+              touch /tmp/fuser;
+              {{ oracle_grid_oracle_home }}/OPatch/opatch auto {{ oracle_patch_installer_directory }}/27726505/27475913
+                -ocmrf /tmp/ocm.rsp"
+      chdir: "{{ oracle_patch_installer_directory }}/27726505/27475913"
+      register: patch_result
+      failed_when: "'opatch auto succeeded.' not in patch_result.stdout_lines"
+      become: true
 
-- name: Upgrade PSU in database
-  shell: ". ~/.bash_profile;
-          sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/rdbms/admin/catbundle psu apply"
-  register: sql_result
-  failed_when: sql_result.rc != 0
-  become: yes
-  become_user: "{{ service_user_name }}"
+    - name: Upgrade PSU in database
+      raw: ". ~/.bash_profile;
+              sqlplus '/ as sysdba' @{{ oracle_database_oracle_home }}/rdbms/admin/catbundle psu apply"
+      register: sql_result
+      failed_when: sql_result.rc != 0
+      become: true
+      become_user: "{{ service_user_name }}"
 
-- name: Compile invalid database objects and shutdown
-  shell: ". ~/.bash_profile;
-          sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/rdbms/admin/utlrp;
-          echo -e 'shutdown immediate-\n' | sqlplus '/ as sysdba'"
-  register: sql_result
-  failed_when: sql_result.rc != 0
-  become: yes
-  become_user: "{{ service_user_name }}"
+- block:
+    - name: Compile invalid database objects and shutdown
+      raw: ". ~/.bash_profile;
+              sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/rdbms/admin/utlrp;
+              echo -e 'shutdown immediate-\n' | sqlplus '/ as sysdba'"
+      register: sql_result
+      failed_when: sql_result.rc != 0
+      become: true
+      become_user: "{{ service_user_name }}"
 
-- name: Apply OJVM patch as oracle user
-  shell: "export PATH=$PATH:/tmp;
-          touch /tmp/fuser;
-          {{ oracle_database_oracle_home }}/OPatch/opatch apply
-            -oh {{ oracle_database_oracle_home }} {{ oracle_patch_installer_directory }}/27726505/27475598
-            -silent
-            -ocmrf /tmp/ocm.rsp"
-  register: patch_result
-  failed_when: "'OPatch succeeded.' not in patch_result.stdout_lines"
-  become: yes
-  become_user: "{{ service_user_name }}"
+- block:
+    - name: Create fuser file for OJVM upgrade
+      file:
+        path: "{{ oracle_database_oracle_home }}/bin/fuser"
+        state: touch
+        owner: "{{ rdbms_service_user.name }}"
+        group: "{{ rdbms_service_user.group }}"
+        mode: 0755
 
-- name: Upgrade OJVM in database
-  shell: ". ~/.bash_profile;
-          echo -e 'startup upgrade\n' | sqlplus '/ as sysdba';
-          sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/27475598/postinstall.sql;
-          echo -e 'shutdown immediate\n' | sqlplus '/ as sysdba';
-          echo -e 'startup\n'| sqlplus '/ as sysdba'"
-  register: sql_result
-  failed_when: sql_result.rc != 0
-  become: yes
-  become_user: "{{ service_user_name }}"
+    - name: Apply OJVM patch as oracle user
+      raw: ". ~/.bash_profile;
+             {{ oracle_database_oracle_home }}/OPatch/opatch apply -oh \
+                {{ oracle_database_oracle_home }} {{ oracle_patch_installer_directory }}/27726505/27475598 \
+                -silent -ocmrf /tmp/ocm.rsp"
+      register: patch_result
+      failed_when: "'OPatch succeeded.' not in patch_result.stdout_lines"
+      become: true
+      become_user: "{{ service_user_name }}"
 
-- name: Compile invalid database objects and shutdown
-  shell: ". ~/.bash_profile;
-          sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/rdbms/admin/utlrp"
-  register: sql_result
-  failed_when: sql_result.rc != 0
-  become: yes
-  become_user: "{{ service_user_name }}"
+    - name: Upgrade OJVM in database
+      raw: ". ~/.bash_profile;
+            echo -e 'startup upgrade\n' | sqlplus '/ as sysdba';
+            sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/sqlpatch/27475598/postinstall.sql;
+            echo -e 'shutdown immediate\n' | sqlplus '/ as sysdba';
+            echo -e 'startup\n'| sqlplus '/ as sysdba'"
+      register: sql_result
+      failed_when: sql_result.rc != 0
+      become: true
+      become_user: "{{ service_user_name }}"
+
+- block:
+    - name: Compile invalid database objects and shutdown
+      shell: ". ~/.bash_profile;
+              sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/rdbms/admin/utlrp"
+      register: sql_result
+      failed_when: sql_result.rc != 0
+      become: true
+      become_user: "{{ service_user_name }}"
