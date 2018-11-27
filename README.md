@@ -16,8 +16,9 @@ Role Variables
     - oradb_sysman_password         # defaults to d3l1u5ag41n
     - oradb_dbsnmp_password         # defaults to d3l1u5ag41n
     - oradb_asmsnmp_password        # defaults to d3l1u5ag41n
-    
-    
+    - database_characterset         # defaults to AL32UTF8
+
+
 ```
 
 Example Playbook
@@ -35,4 +36,3 @@ License
 -------
 
 MIT
-
