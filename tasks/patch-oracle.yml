@@ -17,7 +17,7 @@
     dest: "{{ oracle_grid_oracle_home }}"
 
 - name: Copy opatch utility to database home
-  copy: 
+  copy:
     src: "{{ oracle_patch_installer_directory }}/p6880880_112000_Linux-x86-64.zip"
     dest: "{{ oracle_database_oracle_home }}"
     remote_src: yes
