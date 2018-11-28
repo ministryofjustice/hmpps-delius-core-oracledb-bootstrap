@@ -20,6 +20,22 @@
     line: "export ORACLE_HOSTNAME={{ system_hostname }}"
   ignore_errors: true
 
+- name: "Update our service users .bash_profile"
+  lineinfile:
+    path: "/home/{{ service_user_name }}/.bash_profile"
+    regexp: "^export ORACLE_SID="
+    backrefs: true
+    line: "export ORACLE_SID={{ database_sid|default('TEST') }}"
+  ignore_errors: true
+
+- name: "Update our service users .bash_profile"
+  lineinfile:
+    path: "/home/{{ service_user_name }}/.bash_profile"
+    regexp: "^export ORACLE_UNQNAME="
+    backrefs: true
+    line: "export ORACLE_UNQNAME={{ database_global_database_name|default('TEST') }}"
+  ignore_errors: true
+
 - name: Create our tmp dir for this as oracle because ansible
   file:
     state: directory
