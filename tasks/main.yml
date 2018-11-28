@@ -43,12 +43,12 @@
   when: not oradb_installed|default(false)
 
 - block:
-    # - name: Install OPatch utility
-    #   include: patch-oracle.yml
+    - name: Install OPatch utility
+      include: patch-oracle.yml
 
     - name: Install PSU patch
       include: patch-psu.yml
 
-  # when:
-  #   - not grid_installed|default(false)
-  #   - not oradb_installed|default(false)
+  when:
+    - not grid_installed|default(false)
+    - not oradb_installed|default(false)
