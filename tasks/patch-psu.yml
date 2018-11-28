@@ -40,9 +40,8 @@
       file:
         path: "{{ oracle_database_oracle_home }}/bin/fuser"
         state: touch
-        owner: "{{ rdbms_service_user.name }}"
-        group: "{{ rdbms_service_user.group }}"
-        mode: 0755
+        owner: "{{ service_user_name }}"
+        mode: 0775
 
     - name: Apply OJVM patch as oracle user
       raw: ". ~/.bash_profile;
