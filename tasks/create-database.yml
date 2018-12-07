@@ -1,10 +1,17 @@
 ---
 
-- name: preparing database template
+- name: preparing database response template
   template:
     src: "{{ role_path }}/templates/dbca.rsp.j2"
     dest: "/tmp/dbca.rsp"
     owner: "{{ service_user_name }}"
+
+- name: Copy our database template
+  copy:
+    src: "{{ role_path }}/database.dbc"
+    dest: "{{ oracle_database_oracle_home}}/assistants/dbca/templates/database.dbc"
+    owner: "{{ service_user_name }}"
+    remote_src: true
 
 - name: run database configuration assistant
   shell: "{{ oracle_database_oracle_home }}/bin/dbca -silent  -responseFile /tmp/dbca.rsp"
