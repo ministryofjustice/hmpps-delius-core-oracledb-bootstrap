@@ -17,3 +17,9 @@
     - { limit: 'soft', type: memlock, value: '{{ system_memory_kb|int }}' }
     - { limit: 'hard', type: memlock, value: '{{ system_memory_kb|int }}' }
 
+- name: Set VM HugePages
+  sysctl:
+    name: vm.nr_hugepages
+    value: 1
+    state: present
+  become: true
