@@ -8,7 +8,7 @@
 
 - name: Copy our database template
   copy:
-    src: "{{ role_path }}/database.dbc"
+    src: "{{ role_path }}/files/database.dbc"
     dest: "{{ oracle_database_oracle_home}}/assistants/dbca/templates/database.dbc"
     owner: "{{ service_user_name }}"
     remote_src: true
