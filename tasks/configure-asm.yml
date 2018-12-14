@@ -4,9 +4,7 @@
 - name: run bash shell script do discover asm disks
   shell: "~/discover-asm-disks.sh"
   register: command_result
-  retries: 5
-  delay: 60
-  until: "command_result.stdout == 'Writing Oracle ASM library driver configuration: done'"
+  failed_when: command_result.rc != 0
 
 - name: configure Grid Infrastructure for a Stand-Alone Server
   shell: "{{ oracle_grid_oracle_home }}/perl/bin/perl -I {{ oracle_grid_oracle_home }}/perl/lib -I {{ oracle_grid_oracle_home }}/crs/install {{ oracle_grid_oracle_home }}/crs/install/roothas.pl"
