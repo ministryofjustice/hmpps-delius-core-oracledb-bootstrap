@@ -1,10 +1,21 @@
 ---
 
-# This sometimes fails as the disks are not ready, so we loop over it until all we get back is that the driver config is written
 - name: run bash shell script do discover asm disks
   shell: "~/discover-asm-disks.sh"
   register: command_result
   failed_when: command_result.rc != 0
+
+- name: Check ASM status
+  shell: "/usr/sbin/oracleasm status | grep 'yes' | wc -l"
+  register: asm_status_result
+  failed_when: asm_status_result.stdout != "2"
+  become: true
+
+- name: Check ASM disks
+  shell: "/usr/sbin/oracleasm listdisks | wc -l"
+  register: asm_listdisks_result
+  failed_when: asm_listdisks_result.stdout != "2"
+  become: true
 
 - name: configure Grid Infrastructure for a Stand-Alone Server
   shell: "{{ oracle_grid_oracle_home }}/perl/bin/perl -I {{ oracle_grid_oracle_home }}/perl/lib -I {{ oracle_grid_oracle_home }}/crs/install {{ oracle_grid_oracle_home }}/crs/install/roothas.pl"
