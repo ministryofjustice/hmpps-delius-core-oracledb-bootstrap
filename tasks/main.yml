@@ -40,7 +40,10 @@
       file:
         path: "/home/{{ service_user_name }}/.oradb_installed"
         state: touch
-  when: not oradb_installed|default(false)
+  when:
+    - not oradb_installed|default(false)
+    - database_type != "standby"
+  tags: create_db
 
 - block:
     - name: Install OPatch utility
