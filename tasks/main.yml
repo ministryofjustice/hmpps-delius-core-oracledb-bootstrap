@@ -3,21 +3,26 @@
 - name: (main) Load in our vars
   include_vars:
     file: main.yml
+  tags: always
 
 - block:
     - name: (main) Define our service user
       set_fact:
         service_user_name: "oracle"
   when: not service_user_name|default(false)
+  tags: always
 
 - name: (main) Get our instance facts
   ec2_metadata_facts:
+  tags: always
 
 - name: (main) Gather installation facts
   include: check-installation.yml
+  tags: always
 
 - name: Reconfigure our config that was set during ami build
   include: reconfigure-instance.yml
+  tags: always
 
 - block:
     - name: (main) Configure and startup asm
