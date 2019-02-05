@@ -1,13 +1,13 @@
 ---
 
-- name: Copy the PSU ocm response file to /tmp
+- name: (main/patch-psu) Copy the PSU ocm response file to /tmp
   copy:
     src: "{{ role_path }}/files/ocm.rsp"
     dest: "/tmp/ocm.rsp"
     remote_src: true
 
 - block:
-    - name: Apply PSU as root user
+    - name: (main/patch-psu) Apply PSU as root user
       raw: "export PATH=$PATH:/tmp;
               touch /tmp/fuser;
               {{ oracle_grid_oracle_home }}/OPatch/opatch auto {{ oracle_patch_installer_directory }}/27726505/27475913
@@ -17,7 +17,7 @@
       failed_when: "'opatch auto succeeded.' not in patch_result.stdout_lines"
       become: true
 
-    - name: Upgrade PSU in database
+    - name: (main/patch-psu) Upgrade PSU in database
       raw: ". ~/.bash_profile;
               sqlplus '/ as sysdba' @{{ oracle_database_oracle_home }}/rdbms/admin/catbundle psu apply"
       register: sql_result
@@ -26,7 +26,7 @@
       become_user: "{{ service_user_name }}"
 
 - block:
-    - name: Compile invalid database objects and shutdown
+    - name: (main/patch-psu) Compile invalid database objects and shutdown
       raw: ". ~/.bash_profile;
               sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/rdbms/admin/utlrp;
               echo -e 'shutdown immediate-\n' | sqlplus '/ as sysdba'"
@@ -36,14 +36,14 @@
       become_user: "{{ service_user_name }}"
 
 - block:
-    - name: Create fuser file for OJVM upgrade
+    - name: (main/patch-psu) Create fuser file for OJVM upgrade
       file:
         path: "{{ oracle_database_oracle_home }}/bin/fuser"
         state: touch
         owner: "{{ service_user_name }}"
         mode: 0775
 
-    - name: Apply OJVM patch as oracle user
+    - name: (main/patch-psu) Apply OJVM patch as oracle user
       raw: ". ~/.bash_profile;
              {{ oracle_database_oracle_home }}/OPatch/opatch apply -oh \
                 {{ oracle_database_oracle_home }} {{ oracle_patch_installer_directory }}/27726505/27475598 \
@@ -53,7 +53,7 @@
       become: true
       become_user: "{{ service_user_name }}"
 
-    - name: Upgrade OJVM in database
+    - name: (main/patch-psu) Upgrade OJVM in database
       raw: ". ~/.bash_profile;
             echo -e 'startup upgrade\n' | sqlplus '/ as sysdba';
             sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/sqlpatch/27475598/postinstall.sql;
@@ -65,7 +65,7 @@
       become_user: "{{ service_user_name }}"
 
 - block:
-    - name: Compile invalid database objects and shutdown
+    - name: (main/patch-psu) Compile invalid database objects and shutdown
       shell: ". ~/.bash_profile;
               sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/rdbms/admin/utlrp"
       register: sql_result

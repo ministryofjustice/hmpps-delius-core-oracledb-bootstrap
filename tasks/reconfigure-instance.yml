@@ -1,6 +1,6 @@
 ---
 
-- name: Update our service_users profile so that the ORACLE_HOSTNAME variable is correct and resolves
+- name: (main/reconfigure-instance) Update our service_users profile so that the ORACLE_HOSTNAME variable is correct and resolves
   include: update-service-user.yml
 
 - name: Find out how much system memory we have
@@ -8,7 +8,7 @@
     system_memory_kb: "{{ ((ansible_memtotal_mb/10)*9)*1024|int }}"
   ignore_errors: true
 
-- name: Update oracle memory limits
+- name: (main/reconfigure-instance) Update oracle memory limits
   lineinfile:
     dest: /etc/security/limits.conf
     regexp: "{{ service_user_name }} {{ item.limit }} {{ item.type}}"
