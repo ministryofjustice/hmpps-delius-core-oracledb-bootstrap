@@ -12,9 +12,9 @@
 
 - name: (main/patch-oracle) Copy opatch utility to grid home
   copy:
-    remote_src: yes
     src: "{{ oracle_patch_installer_directory }}/p6880880_112000_Linux-x86-64.zip"
     dest: "{{ oracle_grid_oracle_home }}"
+    remote_src: yes
 
 - name: (main/patch-oracle) Copy opatch utility to database home
   copy:
@@ -26,8 +26,8 @@
   unarchive:
     src: "{{ item }}/p6880880_112000_Linux-x86-64.zip"
     dest: "{{ item }}"
-    owner: "{{ service_user_name }}"
     remote_src: yes
+    owner: "{{ service_user_name }}"
   with_items:
     - "{{ oracle_grid_oracle_home }}"
     - "{{ oracle_database_oracle_home }}"
@@ -40,3 +40,4 @@
     - "{{ oracle_patch_installer_directory }}/p6880880_112000_Linux-x86-64.zip"
     - "{{ oracle_grid_oracle_home }}/p6880880_112000_Linux-x86-64.zip"
     - "{{ oracle_database_oracle_home }}/p6880880_112000_Linux-x86-64.zip}}"
+  when: not develop
