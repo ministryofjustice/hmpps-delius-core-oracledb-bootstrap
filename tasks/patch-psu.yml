@@ -6,12 +6,6 @@
     dest: "/tmp/ocm.rsp"
     remote_src: true
 
-{{ oracle_database_oracle_home }}/OPatch/opatch napply /u01/software/11gR/patches/27726505/27475913/27338049 -local -silent -ocmrf /tmp/ocm.rsp -oh {{ oracle_database_oracle_home }}
-successful Composite patch 27338049 successfully applied
-
-{{ oracle_database_oracle_home }}/OPatch/opatch napply /u01/software/11gR/patches/27726505/27475913/27441052/custom/server/27441052 -local -silent -ocmrf /tmp/ocm.rsp -oh /{{ oracle_database_oracle_home }}
-successful when OPatch succeeded
-
 - block:
     - name: (main/patch-psu) Apply PSU as root user
       raw: "export PATH=$PATH:/tmp;
