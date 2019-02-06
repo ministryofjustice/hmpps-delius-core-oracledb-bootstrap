@@ -40,4 +40,4 @@
     - "{{ oracle_patch_installer_directory }}/p6880880_112000_Linux-x86-64.zip"
     - "{{ oracle_grid_oracle_home }}/p6880880_112000_Linux-x86-64.zip"
     - "{{ oracle_database_oracle_home }}/p6880880_112000_Linux-x86-64.zip}}"
-  when: develop
+  when: not develop|default(false)
