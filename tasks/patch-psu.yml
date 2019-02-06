@@ -25,6 +25,7 @@
       register: patch_result
       failed_when: "'Composite patch 27338049 successfully applied' not in patch_result.stdout_lines"
       become: true
+      become_user: "{{ service_user_name }}"
       when:
         - database_type == "standby"
 
@@ -36,6 +37,7 @@
       register: patch_result
       failed_when: "'OPatch succeeded' not in patch_result.stdout_lines"
       become: true
+      become_user: "{{ service_user_name }}"
       when:
         - database_type == "standby"
 
