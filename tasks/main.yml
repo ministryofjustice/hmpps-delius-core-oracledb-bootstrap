@@ -58,7 +58,7 @@
     - name: (main) Install PSU patch
       include: patch-psu.yml
 
-  when:
-    - not grid_installed|default(false)
-    - not oradb_installed|default(false)
+  # when:
+  #   - not grid_installed|default(false)
+  #   - not oradb_installed|default(false)
   tags: patch
