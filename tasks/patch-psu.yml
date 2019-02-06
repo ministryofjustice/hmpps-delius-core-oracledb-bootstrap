@@ -6,6 +6,12 @@
     dest: "/tmp/ocm.rsp"
     remote_src: true
 
+{{ oracle_database_oracle_home }}/OPatch/opatch napply /u01/software/11gR/patches/27726505/27475913/27338049 -local -silent -ocmrf /tmp/ocm.rsp -oh {{ oracle_database_oracle_home }}
+successful Composite patch 27338049 successfully applied
+
+{{ oracle_database_oracle_home }}/OPatch/opatch napply /u01/software/11gR/patches/27726505/27475913/27441052/custom/server/27441052 -local -silent -ocmrf /tmp/ocm.rsp -oh /{{ oracle_database_oracle_home }}
+successful when OPatch succeeded
+
 - block:
     - name: (main/patch-psu) Apply PSU as root user
       raw: "export PATH=$PATH:/tmp;
@@ -17,6 +23,28 @@
       failed_when: "'opatch auto succeeded.' not in patch_result.stdout_lines"
       become: true
 
+    - name: (main/patch-psu) Apply Composite patch 27338049 to standby
+      raw: "export PATH=$PATH:/tmp;
+              {{ oracle_database_oracle_home }}/OPatch/opatch napply {{ oracle_patch_installer_directory }}/27726505/27475913/27338049
+                -local -silent -ocmrf /tmp/ocm.rsp -oh {{ oracle_database_oracle_home }}"
+      chdir: "{{ oracle_patch_installer_directory }}/27726505/27475913/27338049"
+      register: patch_result
+      failed_when: "'Composite patch 27338049 successfully applied' not in patch_result.stdout_lines"
+      become: true
+      when:
+        - database_type == "standby"
+
+    - name: (main/patch-psu) Apply OPatch 27441052/custom/server/27441052 to standby
+      raw: "export PATH=$PATH:/tmp;
+              {{ oracle_database_oracle_home }}/OPatch/opatch napply {{ oracle_patch_installer_directory }}/27726505/27475913/27441052/custom/server/27441052
+                -local -silent -ocmrf /tmp/ocm.rsp -oh /{{ oracle_database_oracle_home }}"
+      chdir: "{{ oracle_patch_installer_directory }}/27726505/27475913/27441052/custom/server/27441052"
+      register: patch_result
+      failed_when: "'OPatch succeeded' not in patch_result.stdout_lines"
+      become: true
+      when:
+        - database_type == "standby"
+
     - name: (main/patch-psu) Upgrade PSU in database
       raw: ". ~/.bash_profile;
               sqlplus '/ as sysdba' @{{ oracle_database_oracle_home }}/rdbms/admin/catbundle psu apply"
@@ -24,6 +52,8 @@
       failed_when: sql_result.rc != 0
       become: true
       become_user: "{{ service_user_name }}"
+      when:
+        - database_type != "standby"
 
 - block:
     - name: (main/patch-psu) Compile invalid database objects and shutdown
@@ -34,6 +64,8 @@
       failed_when: sql_result.rc != 0
       become: true
       become_user: "{{ service_user_name }}"
+  when:
+    - database_type != "standby"
 
 - block:
     - name: (main/patch-psu) Create fuser file for OJVM upgrade
@@ -63,6 +95,8 @@
       failed_when: sql_result.rc != 0
       become: true
       become_user: "{{ service_user_name }}"
+      when:
+        - database_type != "standby"
 
 - block:
     - name: (main/patch-psu) Compile invalid database objects and shutdown
@@ -72,3 +106,5 @@
       failed_when: sql_result.rc != 0
       become: true
       become_user: "{{ service_user_name }}"
+  when:
+    - database_type != "standby"
