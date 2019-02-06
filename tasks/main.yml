@@ -20,7 +20,7 @@
   include: check-installation.yml
   tags: always
 
-- name: Reconfigure our config that was set during ami build
+- name: (main) Reconfigure our config that was set during ami build
   include: reconfigure-instance.yml
   tags: always
 
