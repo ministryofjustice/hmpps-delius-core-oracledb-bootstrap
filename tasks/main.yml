@@ -16,7 +16,7 @@
   ec2_metadata_facts:
   tags: always
 
-- name: Print some debug information
+- name: (main) Display database type
   debug:
     var: database_type
     verbosity: 1
