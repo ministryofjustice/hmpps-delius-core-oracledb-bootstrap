@@ -20,3 +20,14 @@
   set_fact:
     oradb_installed: true
   when: oradb_install_check_file.stat.exists
+
+- name: (main/check-installation) validate patches applied
+  stat:
+    path: "/home/{{ service_user_name }}/.patches_applied"
+  register: patches_applied_check_file
+  become: yes
+
+- name: (main/check-installation) are patches applied
+  set_fact:
+    patches_applied: true
+  when: patches_applied_check_file.stat.exists

@@ -35,6 +35,11 @@
       file:
         path: "/home/{{ service_user_name }}/.grid_installed"
         state: touch
+
+    - name: (main) grid installed
+      set_fact:
+        grid_installed: true
+
   when: not grid_installed|default(false)
   tags: asm
 
@@ -46,8 +51,10 @@
       file:
         path: "/home/{{ service_user_name }}/.oradb_installed"
         state: touch
+
   when:
     - not oradb_installed|default(false)
+    - grid_installed|default(false)
     - database_type != "standby"
   tags: create_db
 
@@ -58,7 +65,19 @@
     - name: (main) Install PSU patch
       include: patch-psu.yml
 
-  # when:
-  #   - not grid_installed|default(false)
-  #   - not oradb_installed|default(false)
+    - name: (main) Remove our patch source archive now we have patched
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ oracle_patch_installer_directory }}/p6880880_112000_Linux-x86-64.zip"
+
+    - name: (main) Create our check file so we don't run this again
+      file:
+        path: "/home/{{ service_user_name }}/.patches_applied"
+        state: touch
+
+  when:
+    - grid_installed|default(false)
+    - not patches_applied|default(false)
   tags: patch
