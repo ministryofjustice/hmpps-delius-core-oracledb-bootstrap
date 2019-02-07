@@ -1,54 +1,89 @@
 ---
 
-- name: Load in our vars
+- name: (main) Load in our vars
   include_vars:
     file: main.yml
+  tags: always
 
 - block:
-    - name: Define our service user
+    - name: (main) Define our service user
       set_fact:
         service_user_name: "oracle"
   when: not service_user_name|default(false)
+  tags: always
 
-- name: Get our instance facts
+- name: (main) Get our instance facts
   ec2_metadata_facts:
+  tags: always
 
-- name: Gather installation facts
+- name: (main) Display database type
+  debug:
+    var: database_type
+    verbosity: 1
+  tags: always
+
+- name: (main) Gather installation facts
   include: check-installation.yml
+  tags: always
 
-- name: Reconfigure our config that was set during ami build
+- name: (main) Reconfigure our config that was set during ami build
   include: reconfigure-instance.yml
+  tags: always
 
 - block:
-    - name: Configure and startup asm
+    - name: (main) Configure and startup asm
       include: configure-asm.yml
 
-    - name: Configure our flash disk groups
+    - name: (main) Configure our flash disk groups
       include: configure-disk-groups.yml
 
-    - name: Create our check file so we don't run this again
+    - name: (main) Create our check file so we don't run this again
       file:
         path: "/home/{{ service_user_name }}/.grid_installed"
         state: touch
+
+    - name: (main) grid installed
+      set_fact:
+        grid_installed: true
+
   when: not grid_installed|default(false)
+  tags: asm
 
 - block:
-    - name: Configure out database
+    - name: (main) Configure out database
       include: create-database.yml
 
-    - name: Create our check file so we don't run this again
+    - name: (main) Create our check file so we don't run this again
       file:
         path: "/home/{{ service_user_name }}/.oradb_installed"
         state: touch
-  when: not oradb_installed|default(false)
-
-- block:
-    - name: Install OPatch utility
-      include: patch-oracle.yml
-
-    - name: Install PSU patch
-      include: patch-psu.yml
 
   when:
-    - not grid_installed|default(false)
     - not oradb_installed|default(false)
+    - grid_installed|default(false)
+    - database_type != "standby"
+  tags: create_db
+
+- block:
+    - name: (main) Install OPatch utility
+      include: patch-oracle.yml
+
+    - name: (main) Install PSU patch
+      include: patch-psu.yml
+
+    - name: (main) Remove our patch source archive now we have patched
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ oracle_patch_installer_directory }}/p6880880_112000_Linux-x86-64.zip"
+
+    - name: (main) Create our check file so we don't run this again
+      file:
+        path: "/home/{{ service_user_name }}/.patches_applied"
+        state: touch
+
+  when:
+    - grid_installed|default(false)
+    - not patches_applied|default(false)
+  tags: patch

@@ -11,6 +11,7 @@ Role Variables
     - service_user_name             # defaults to oracle
     - database_global_database_name # db name we are creating defaults to TEST
     - database_sid                  # sid of db defaults to TEST
+    - database_type                 # whether it's a primary or standby, defaults to STANDALONE
     - oradb_sys_password            # defaults to d3l1u5ag41n
     - oradb_system_password         # defaults to d3l1u5ag41n
     - oradb_sysman_password         # defaults to d3l1u5ag41n
