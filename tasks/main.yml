@@ -87,3 +87,19 @@
     - grid_installed|default(false)
     - not patches_applied|default(false)
   tags: patch
+
+
+  - block:
+      - name: (main) Restore Cold Backup
+        include: restore-cold-backup.yml
+
+      # - name: (main) Create our check file so we don't run this again
+      #   file:
+      #     path: "/home/{{ service_user_name }}/.restored_backup"
+      #     state: touch
+
+    when:
+      - grid_installed|default(false)
+      - oradb_installed|default(false)
+      - patches_applied|default(false)
+    tags: restore

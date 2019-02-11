@@ -1,0 +1,41 @@
+---
+
+- name: (main/restore-cold-backup) XXX
+  debug:
+    var: service_user_name
+    verbosity: 1
+
+- name: (main/restore-cold-backup) XXX
+  debug:
+    var: database_global_database_name
+    verbosity: 1
+
+- name: (main/restore-cold-backup) XXX
+  debug:
+    var: database_sid
+    verbosity: 1
+
+- name: (main/restore-cold-backup) XXX
+  debug:
+    var: database_characterset
+    verbosity: 1
+
+- name: (main/restore-cold-backup) XXX
+  debug:
+    var: database_type
+    verbosity: 1
+
+- name: (main/restore-cold-backup) XXX
+  debug:
+    var: database_bootstrap_restore
+    verbosity: 1
+
+- name: (main/restore-cold-backup) XXX
+  debug:
+    var: database_backup
+    verbosity: 1
+
+- name: (main/restore-cold-backup) XXX
+  debug:
+    var: dependencies_bucket_arn
+    verbosity: 1
