@@ -99,6 +99,8 @@
     #     state: touch
 
   when:
+    - database_type != "standby"
+    - database_bootstrap_restore|default(false)
     - grid_installed|default(false)
     - oradb_installed|default(false)
     - patches_applied|default(false)

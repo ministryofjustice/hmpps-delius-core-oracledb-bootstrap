@@ -39,3 +39,36 @@
   debug:
     var: dependencies_bucket_arn
     verbosity: 1
+
+- name: (main/restore-cold-backup) XXX
+  debug:
+    msg: "{{ dependencies_bucket_arn | regex_replace('^arn:aws:s3:::','') }}"
+    verbosity: 1
+
+- name: (main/restore-cold-backup) Extract S3 bucket name from arn
+  set_fact:
+    src_s3_bucket_name: "{{ dependencies_bucket_arn | regex_replace('^arn:aws:s3:::','') }}"
+
+- name: (main/restore-cold-backup) XXX
+  debug:
+    var: src_s3_bucket_name
+    verbosity: 1
+
+- name: (main/restore-cold-backup) Set source S3 backup path
+  set_fact:
+    src_s3_backup_path: "s3://{{ src_s3_bucket_name }}/{{ database_backup }}/"
+
+- name: (main/restore-cold-backup) XXX
+  debug:
+    var: src_s3_backup_path
+    verbosity: 1
+
+- name: (main/restore-cold-backup) lookup ssm parameter store in nominated region
+  debug:
+    msg: "{{ lookup('aws_ssm', '{{ database_backup_sys_passwd }}', region=''~ region ~'' ) }}"
+    verbosity: 1
+
+- name: (main/restore-cold-backup) Set source ora db sys password
+  set_fact:
+    sys_passwd: "{{ lookup('aws_ssm', '{{ database_backup_sys_passwd }}', region=''~ region ~'' ) }}"
+  no_log: true
