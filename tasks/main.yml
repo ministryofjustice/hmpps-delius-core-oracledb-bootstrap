@@ -93,10 +93,10 @@
     - name: (main) Restore Cold Backup
       include: restore-cold-backup.yml
 
-    # - name: (main) Create our check file so we don't run this again
-    #   file:
-    #     path: "/home/{{ service_user_name }}/.restored_backup"
-    #     state: touch
+    - name: (main) Create our check file so we don't run this again
+      file:
+        path: "/home/{{ service_user_name }}/.restored_backup"
+        state: touch
 
   when:
     - database_type != "standby"
