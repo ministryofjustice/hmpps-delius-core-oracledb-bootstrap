@@ -6,7 +6,7 @@
     mode: 0775
     state: directory
   become: yes
-  become_user: oracle
+  become_user: "{{ service_user_name }}"
 
 - name: (main/restore-cold-backup) Copy restore script.
   copy:
@@ -14,12 +14,7 @@
     dest: "{{ database_backup_location }}/restoredb.sh"
     mode: 0744
   become: yes
-  become_user: oracle
-
-- name: (main/restore-cold-backup) lookup ssm parameter store in nominated region
-  debug:
-    msg: "{{ lookup('aws_ssm', '{{ database_backup_sys_passwd }}', region=''~ region ~'' ) }}"
-    verbosity: 4
+  become_user: "{{ service_user_name }}"
 
 - name: (main/restore-cold-backup) Set source ora db sys password
   set_fact:
@@ -30,7 +25,7 @@
   set_fact:
     src_s3_bucket_name: "{{ dependencies_bucket_arn | regex_replace('^arn:aws:s3:::','') }}"
 
-- name: (main/restore-cold-backup) XXX
+- name: (main/restore-cold-backup) debug src_s3_bucket_name
   debug:
     var: src_s3_bucket_name
     verbosity: 1
@@ -61,9 +56,21 @@
 #     overwrite: different
 #   with_items: "{{ s3_contents.s3_keys }}"
 
-- name: (main/restore-cold-backup) Run script
-  shell: "{{ database_backup_location }}/restoredb.sh -d {{ database_sid }} -l {{ database_backup_location }}/{{ database_backup }} -p {{ sys_passwd }} -s {{ src_s3_backup_path }}"
-  register: restoredb_result
-  failed_when: restoredb_result.stdout != "0"
+## using S3 sync from within script as Ansible module creates long path to backup
+## which is not compatible with the back up
+
+- name: (main/restore-cold-backup) Run script to download backup
+  shell: "{{ database_backup_location }}/restoredb.sh -l {{ database_backup_location }} -s {{ src_s3_backup_path }} -a download"
+  register: restoredb_d_result
+  failed_when: restoredb_d_result.rc != 0
   become: yes
-  become_user: oracle
+  become_user: "{{ service_user_name }}"
+
+- name: (main/restore-cold-backup) Run script to restore from backup
+  shell: "export PATH=$PATH; {{ database_backup_location }}/restoredb.sh -d {{ database_sid }} -l {{ database_backup_location }} -p {{ sys_passwd }} -a restore"
+  register: restoredb_r_result
+  failed_when: restoredb_r_result.rc != 0
+  ignore_errors: true
+  become: yes
+  become_user: "{{ service_user_name }}"
+  no_log: true
