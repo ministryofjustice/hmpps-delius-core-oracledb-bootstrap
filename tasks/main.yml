@@ -58,6 +58,10 @@
         path: "/home/{{ service_user_name }}/.oradb_installed"
         state: touch
 
+    - name: (main) oradb installed
+      set_fact:
+        oradb_installed: true
+
   when:
     - not oradb_installed|default(false)
     - grid_installed|default(false)
@@ -83,6 +87,10 @@
         path: "/home/{{ service_user_name }}/.patches_applied"
         state: touch
 
+    - name: (main) patches applied
+      set_fact:
+        patches_applied: true
+
   when:
     - grid_installed|default(false)
     - not patches_applied|default(false)
@@ -97,6 +105,10 @@
       file:
         path: "/home/{{ service_user_name }}/.restored_backup"
         state: touch
+
+    - name: (main) backup restored
+      set_fact:
+        backup_restored: true
 
   when:
     - database_type != "standby"
