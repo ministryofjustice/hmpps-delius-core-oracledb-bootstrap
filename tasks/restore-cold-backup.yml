@@ -1,0 +1,76 @@
+---
+
+- name: (main/restore-cold-backup) Create dir for backup files
+  file:
+    path: "{{ database_backup_location }}/{{ database_backup }}"
+    mode: 0775
+    state: directory
+  become: true
+  become_user: "{{ service_user_name }}"
+
+- name: (main/restore-cold-backup) Copy restore script.
+  copy:
+    src: "{{ role_path }}/files/restoredb.sh"
+    dest: "{{ database_backup_location }}/restoredb.sh"
+    mode: 0744
+  become: true
+  become_user: "{{ service_user_name }}"
+
+- name: (main/restore-cold-backup) Set source ora db sys password
+  set_fact:
+    sys_passwd: "{{ lookup('aws_ssm', '{{ database_backup_sys_passwd }}', region=''~ region ~'' ) }}"
+  no_log: true
+
+- name: (main/restore-cold-backup) Extract S3 bucket name from arn
+  set_fact:
+    src_s3_bucket_name: "{{ dependencies_bucket_arn | regex_replace('^arn:aws:s3:::','') }}"
+
+- name: (main/restore-cold-backup) debug src_s3_bucket_name
+  debug:
+    var: src_s3_bucket_name
+    verbosity: 1
+
+- name: (main/restore-cold-backup) Set source S3 backup path
+  set_fact:
+    src_s3_backup_path: "s3://{{ src_s3_bucket_name }}/{{ database_backup }}/"
+
+- name: (main/restore-cold-backup) List backups
+  aws_s3:
+    bucket: "{{ src_s3_bucket_name }}"
+    mode: list
+    prefix: "{{ database_backup }}/"
+  register: s3_contents
+  failed_when: s3_contents.s3_keys|length|int < 1
+
+# - name: (main/restore-cold-backup) s3_contents
+#   debug:
+#     var: s3_contents
+#     verbosity: 1
+#
+# - name: (main/restore-cold-backup) Get backups
+#   aws_s3:
+#     bucket: "{{ src_s3_bucket_name }}"
+#     object: "{{ item }}"
+#     dest: "{{ database_backup_location }}/{{ item }}"
+#     mode: get
+#     overwrite: different
+#   with_items: "{{ s3_contents.s3_keys }}"
+
+## using S3 sync from within script as Ansible module creates long path to backup
+## which is not compatible with the back up
+
+- name: (main/restore-cold-backup) Run script to download backup
+  shell: "{{ database_backup_location }}/restoredb.sh -l {{ database_backup_location }} -s {{ src_s3_backup_path }} -a download"
+  register: restoredb_d_result
+  failed_when: restoredb_d_result.rc != 0
+  become: true
+  become_user: "{{ service_user_name }}"
+
+- name: (main/restore-cold-backup) Run script to restore from backup
+  shell: "export PATH=$PATH; {{ database_backup_location }}/restoredb.sh -d {{ database_sid }} -l {{ database_backup_location }} -p {{ sys_passwd }} -a restore"
+  register: restoredb_r_result
+  failed_when: restoredb_r_result.rc != 0
+  ignore_errors: true
+  become: true
+  become_user: "{{ service_user_name }}"
+  no_log: true

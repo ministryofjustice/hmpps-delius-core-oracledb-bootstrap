@@ -19,6 +19,13 @@ Role Variables
     - oradb_asmsnmp_password        # defaults to d3l1u5ag41n
     - database_characterset         # defaults to AL32UTF8
 
+    # the following are required if the db is not a database_type: standby
+    - dependencies_bucket_arn       # Arn of the bucket where the db backups are stored
+    - database_bootstrap_restore    # Whether this environement has restore on bootsrap. defaults to False
+    - database_backup               # S3 backup prefix (path)
+    - database_backup_sys_passwd    # Name of SSM parameter
+    - database_backup_location      # path on instance where back is to be restored from
+
 
 ```
 

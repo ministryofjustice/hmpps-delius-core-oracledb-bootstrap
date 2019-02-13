@@ -4,6 +4,7 @@
   stat:
     path: "/home/{{ service_user_name }}/.grid_installed"
   register: grid_install_check_file
+  become: true
 
 - name: Is grid installed
   set_fact:
@@ -14,7 +15,7 @@
   stat:
     path: "/home/{{ service_user_name }}/.oradb_installed"
   register: oradb_install_check_file
-  become: yes
+  become: true
 
 - name: (main/check-installation) Is oradb installed
   set_fact:
@@ -25,9 +26,20 @@
   stat:
     path: "/home/{{ service_user_name }}/.patches_applied"
   register: patches_applied_check_file
-  become: yes
+  become: true
 
 - name: (main/check-installation) are patches applied
   set_fact:
     patches_applied: true
   when: patches_applied_check_file.stat.exists
+
+- name: (main/check-installation) validate backup restored
+  stat:
+    path: "/home/{{ service_user_name }}/.backup_restored"
+  register: backup_restored_check_file
+  become: true
+
+- name: (main/check-installation) is backup restored
+  set_fact:
+    backup_restored: true
+  when: backup_restored_check_file.stat.exists

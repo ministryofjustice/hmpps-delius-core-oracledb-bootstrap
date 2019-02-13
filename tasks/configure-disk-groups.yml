@@ -9,7 +9,7 @@
 
 - name: (main/configure-disk-groups) Create FRA recovery disk group
   shell: ". ~/.bash_profile && /tmp/create-flash.sh"
-  become: yes
+  become: true
   become_user: "{{ service_user_name }}"
   register: sql_result
   failed_when: "'Diskgroup created.' not in sql_result.stdout_lines"

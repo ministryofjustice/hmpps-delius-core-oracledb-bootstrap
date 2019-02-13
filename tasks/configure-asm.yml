@@ -29,12 +29,12 @@
     dest: "/tmp/netca.rsp"
 
 - name: (main/reconfigure-asm) configure listener
-  become: yes
+  become: true
   become_user: "{{ service_user_name }}"
   shell: "{{ oracle_grid_oracle_home }}/bin/netca -silent -responsefile /tmp/netca.rsp"
 
 - name: (main/reconfigure-asm) run config of asm as oracle
-  become: yes
+  become: true
   become_user: "{{ service_user_name }}"
   shell: "{{ oracle_grid_oracle_home }}/bin/asmca
             -silent
