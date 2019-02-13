@@ -5,7 +5,7 @@
     path: "{{ database_backup_location }}/{{ database_backup }}"
     mode: 0775
     state: directory
-  become: yes
+  become: true
   become_user: "{{ service_user_name }}"
 
 - name: (main/restore-cold-backup) Copy restore script.
@@ -13,7 +13,7 @@
     src: "{{ role_path }}/files/restoredb.sh"
     dest: "{{ database_backup_location }}/restoredb.sh"
     mode: 0744
-  become: yes
+  become: true
   become_user: "{{ service_user_name }}"
 
 - name: (main/restore-cold-backup) Set source ora db sys password
@@ -63,7 +63,7 @@
   shell: "{{ database_backup_location }}/restoredb.sh -l {{ database_backup_location }} -s {{ src_s3_backup_path }} -a download"
   register: restoredb_d_result
   failed_when: restoredb_d_result.rc != 0
-  become: yes
+  become: true
   become_user: "{{ service_user_name }}"
 
 - name: (main/restore-cold-backup) Run script to restore from backup
@@ -71,6 +71,6 @@
   register: restoredb_r_result
   failed_when: restoredb_r_result.rc != 0
   ignore_errors: true
-  become: yes
+  become: true
   become_user: "{{ service_user_name }}"
   no_log: true

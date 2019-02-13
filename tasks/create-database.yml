@@ -15,6 +15,6 @@
 
 - name: (main/create-database) Run database configuration assistant
   shell: "{{ oracle_database_oracle_home }}/bin/dbca -silent  -responseFile /tmp/dbca.rsp"
-  become: yes
+  become: true
   become_user: "{{ service_user_name }}"
   register: command_result
