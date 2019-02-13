@@ -2,3 +2,4 @@
 # defaults file for hmpps-delius-core-oracledb-bootstrap
 
 database_type: STANDALONE
+database_bootstrap_restore: False
