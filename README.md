@@ -18,6 +18,7 @@ Role Variables
     - oradb_dbsnmp_password         # defaults to d3l1u5ag41n
     - oradb_asmsnmp_password        # defaults to d3l1u5ag41n
     - database_characterset         # defaults to AL32UTF8
+    - asm_disks_quantity            # Number of EBS volumes attached for ASM Disks
 
     # the following are required if the db is not a database_type: standby
     - dependencies_bucket_arn       # Arn of the bucket where the db backups are stored
