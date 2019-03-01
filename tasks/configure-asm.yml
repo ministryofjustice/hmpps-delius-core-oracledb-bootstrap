@@ -1,5 +1,14 @@
 ---
 
+
+
+- name: Ensure our asm discovery template is on the system in roots home directory and is executable
+  copy:
+    src: "{{ role_path }}/files/discover-asm-disks.sh"
+    dest: "~/discover-asm-disks.sh"
+    mode: u+x
+  become: true
+
 - name:  (main/reconfigure-asm)run bash shell script do discover asm disks
   shell: "~/discover-asm-disks.sh"
   register: command_result
