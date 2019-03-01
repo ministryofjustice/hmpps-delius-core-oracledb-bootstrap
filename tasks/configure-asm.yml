@@ -1,5 +1,14 @@
 ---
 
+
+
+- name: Ensure our asm discovery template is on the system in roots home directory and is executable
+  copy:
+    src: "{{ role_path }}/files/discover-asm-disks.sh"
+    dest: "~/discover-asm-disks.sh"
+    mode: u+x
+  become: true
+
 - name:  (main/reconfigure-asm)run bash shell script do discover asm disks
   shell: "~/discover-asm-disks.sh"
   register: command_result
@@ -11,10 +20,14 @@
   failed_when: asm_status_result.stdout != "2"
   become: true
 
+- name: Display ASM disks quantity
+  debug:
+    msg: "ASM disks quantity {{ asm_disks_quantity }}"
+
 - name: (main/reconfigure-asm) Check ASM disks
   shell: "/usr/sbin/oracleasm listdisks | wc -l"
   register: asm_listdisks_result
-  failed_when: asm_listdisks_result.stdout != "2"
+  failed_when: asm_listdisks_result.stdout != "{{ asm_disks_quantity }}"
   become: true
 
 - name: (main/reconfigure-asm) configure Grid Infrastructure for a Stand-Alone Server
