@@ -6,3 +6,4 @@ oracle_database_oracle_home: "{{ oracle_database_oracle_base }}/product/11.2.0.4
 oracle_grid_oracle_base: "{{ oracle_root }}/app/grid"
 oracle_grid_oracle_home: "{{ oracle_grid_oracle_base }}/product/11.2.0.4/grid"
 oracle_patch_installer_directory: "{{ oracle_root }}/software/11gR/patches"
+oracle_dbca_template_file: "database"
