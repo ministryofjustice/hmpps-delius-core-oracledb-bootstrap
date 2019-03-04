@@ -5,7 +5,7 @@ OPERATION_TYPE="createDatabase"
 [CREATEDATABASE]
 GDBNAME={{ database_global_database_name|default('TEST') }}
 SID={{ database_sid|default('TEST') }}
-TEMPLATENAME="General_Purpose.dbc"
+TEMPLATENAME="{{ oracle_dbca_template_file }}.dbc"
 SYSPASSWORD="{{ oradb_sys_password|default('d3l1u5ag41n') }}"
 SYSTEMPASSWORD="{{ oradb_system_password|default('d3l1u5ag41n') }}"
 EMCONFIGURATION="NONE"
