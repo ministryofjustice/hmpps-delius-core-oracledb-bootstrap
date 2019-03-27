@@ -56,6 +56,7 @@ do
                   info "Create full partition"
                   echo -e 'o\nn\np\n1\n\n\nw' | fdisk "${diskfullname}"
                   sync
+                  sleep 5
               else
                   info "Partion exists - skipping"
               fi
@@ -76,6 +77,7 @@ do
 
                   /usr/sbin/oracleasm createdisk "ASMDISK${diskno}" "${partname}"
                   /usr/sbin/oracleasm scandisks
+                  sleep 5
               fi
           else
             info "Not a disk - skipping"
