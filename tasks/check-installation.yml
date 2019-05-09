@@ -1,45 +1,69 @@
 ---
 
-- name: (main/check-installation) validate oracle grid is already installed
-  stat:
-    path: "/home/{{ service_user_name }}/.grid_installed"
-  register: grid_install_check_file
-  become: true
+- block:
+    - name: (main/check-installation) validate oracle grid is already installed
+      stat:
+        path: "/home/{{ service_user_name }}/.grid_installed"
+      register: grid_install_check_file
+      become: true
 
-- name: Is grid installed
-  set_fact:
-    grid_installed: true
-  when: grid_install_check_file.stat.exists
+    - name: Is grid installed (false)
+      set_fact:
+        grid_installed: false
+      when: not grid_install_check_file.stat.exists
 
-- name: (main/check-installation) validate oracle database is already installed
-  stat:
-    path: "/home/{{ service_user_name }}/.oradb_installed"
-  register: oradb_install_check_file
-  become: true
+    - name: Is grid installed (true)
+      set_fact:
+        grid_installed: true
+      when: grid_install_check_file.stat.exists
 
-- name: (main/check-installation) Is oradb installed
-  set_fact:
-    oradb_installed: true
-  when: oradb_install_check_file.stat.exists
+- block:
+    - name: (main/check-installation) validate oracle database is already installed
+      stat:
+        path: "/home/{{ service_user_name }}/.oradb_installed"
+      register: oradb_install_check_file
+      become: true
 
-- name: (main/check-installation) validate patches applied
-  stat:
-    path: "/home/{{ service_user_name }}/.patches_applied"
-  register: patches_applied_check_file
-  become: true
+    - name: (main/check-installation) Is oradb installed (false)
+      set_fact:
+        oradb_installed: false
+      when: not oradb_install_check_file.stat.exists
 
-- name: (main/check-installation) are patches applied
-  set_fact:
-    patches_applied: true
-  when: patches_applied_check_file.stat.exists
+    - name: (main/check-installation) Is oradb installed (true)
+      set_fact:
+        oradb_installed: true
+      when: oradb_install_check_file.stat.exists
 
-- name: (main/check-installation) validate backup restored
-  stat:
-    path: "/home/{{ service_user_name }}/.backup_restored"
-  register: backup_restored_check_file
-  become: true
+- block:
+    - name: (main/check-installation) validate patches applied
+      stat:
+        path: "/home/{{ service_user_name }}/.patches_applied"
+      register: patches_applied_check_file
+      become: true
 
-- name: (main/check-installation) is backup restored
-  set_fact:
-    backup_restored: true
-  when: backup_restored_check_file.stat.exists
+    - name: (main/check-installation) are patches applied (false)
+      set_fact:
+        patches_applied: false
+      when: not patches_applied_check_file.stat.exists
+
+    - name: (main/check-installation) are patches applied (true)
+      set_fact:
+        patches_applied: true
+      when: patches_applied_check_file.stat.exists
+
+- block:
+    - name: (main/check-installation) validate backup restored
+      stat:
+        path: "/home/{{ service_user_name }}/.backup_restored"
+      register: backup_restored_check_file
+      become: true
+
+    - name: (main/check-installation) is backup restored (false)
+      set_fact:
+        backup_restored: false
+      when: not backup_restored_check_file.stat.exists
+
+    - name: (main/check-installation) is backup restored (true)
+      set_fact:
+        backup_restored: true
+      when: backup_restored_check_file.stat.exists
