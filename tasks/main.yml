@@ -96,6 +96,17 @@
     - not patches_applied|default(false)
   tags: patch
 
+- name: (main) Display database_bootstrap_restore var
+  debug:
+    msg:
+      - "database_type - {{database_type}}"
+      - "database_bootstrap_restore - {{database_bootstrap_restore}}"
+      - "backup_restored - {{backup_restored}}"
+      - "grid_installed - {{grid_installed}}"
+      - "oradb_installed - {{oradb_installed}}"
+      - "patches_applied - {{patches_applied}}"
+    verbosity: 2
+  tags: always
 
 - block:
     - name: (main) Restore Cold Backup
@@ -103,18 +114,17 @@
 
     - name: (main) Create our check file so we don't run this again
       file:
-        path: "/home/{{ service_user_name }}/.restored_backup"
+        path: "/home/{{ service_user_name }}/.backup_restored"
         state: touch
 
     - name: (main) backup restored
       set_fact:
         backup_restored: true
-
   when:
     - database_type != "standby"
-    - database_bootstrap_restore|default(false)
-    - not backup_restored|default(false)
-    - grid_installed|default(false)
-    - oradb_installed|default(false)
-    - patches_applied|default(false)
+    - database_bootstrap_restore|bool
+    - not backup_restored|bool
+    - grid_installed|bool
+    - oradb_installed|bool
+    - patches_applied|bool
   tags: restore
