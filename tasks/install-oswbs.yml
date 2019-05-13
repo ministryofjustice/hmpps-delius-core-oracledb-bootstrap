@@ -10,7 +10,7 @@
 - name: (main/install-osbws) Install osbws
   shell: |
     . ${HOME}/.bash_profile
-    java -verbose -jar "{{ oracle_osbws_installer_directory }}/osbws_install.jar" -ARGFILE "{{ oracle_osbws_installer_directory }}/osbws-argfile" > /dev/null
+    java -verbose -jar {{ oracle_osbws_installer_directory }}/osbws_install.jar -ARGFILE {{ oracle_osbws_installer_directory }}/osbws-argfile > /dev/null
     if [ $? -ne 0 ]
     then
       echo "Error installing osbws"
@@ -19,3 +19,13 @@
   become_user: "{{ service_user_name }}"
   register: install
   failed_when: install.rc !=0
+
+
+
+  # cd ${ORACLE_HOME}/lib
+  # OSBLIB=`readlink libobk.so`
+  # [ -z $OSBLIB ] && ln -s libosbws.so libobk.so
+  # grep -q "^OSB_WS_BUCKET=" ${ORACLE_HOME}/dbs/osbws${ORACLE_SID}.ora
+  # [ $? -ne 0 ] && echo "OSB_WS_BUCKET=tf-eu-west-2-hmpps-delius-<env>-backups-s3bucket" >> ${ORACLE_HOME}/dbs/osbws${ORACLE_SID}.ora
+  # grep -q "^OSB_WS_CHUNK_SIZE=" ${ORACLE_HOME}/dbs/osbws${ORACLE_SID}.ora
+  # [ $? -ne 0 ] && echo "OSB_WS_CHUNK_SIZE=524288000" >> ${ORACLE_HOME}/dbs/osbws${ORACLE_SID}.ora
