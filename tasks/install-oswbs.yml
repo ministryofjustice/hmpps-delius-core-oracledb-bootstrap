@@ -14,8 +14,9 @@
   failed_when: install.rc !=0
 
 - name: debug
-  msg:
-    - "{{ install }}"
+  debug:
+    msg:
+      - "{{ install }}"
 
 
 
