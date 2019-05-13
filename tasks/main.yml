@@ -12,6 +12,13 @@
   when: not service_user_name|default(false)
   tags: always
 
+- block:
+    - name: (main) Define our service user's group
+      set_fact:
+        service_user_group: "oinstall"
+  when: not service_user_group|default(false)
+  tags: always
+
 - name: (main) Get our instance facts
   ec2_metadata_facts:
   tags: always
@@ -132,7 +139,7 @@
 - block:
     - name: (main) Install Oracle Secure Web Backup Service (oswbs)
       include: install-oswbs.yml
-      
+
   when:
     - grid_installed|bool
     - oradb_installed|bool
