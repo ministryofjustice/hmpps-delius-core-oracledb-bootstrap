@@ -8,17 +8,14 @@
     group: "{{ service_user_group }}"
 
 - name: (main/install-osbws) Install osbws
-  shell: |
-    . ${HOME}/.bash_profile
-    java -verbose -jar {{ oracle_osbws_installer_directory }}/osbws_install.jar -ARGFILE {{ oracle_osbws_installer_directory }}/osbws-argfile > /dev/null
-    if [ $? -ne 0 ]
-    then
-      echo "Error installing osbws"
-      exit 2
-    fi
+  shell: "java -verbose -jar {{ oracle_osbws_installer_directory }}/osbws_install.jar -ARGFILE {{ oracle_osbws_installer_directory }}/osbws-argfile"
   become_user: "{{ service_user_name }}"
   register: install
   failed_when: install.rc !=0
+
+- name: debug
+  msg:
+    - {{ install }}
 
 
 
