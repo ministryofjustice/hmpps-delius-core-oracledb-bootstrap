@@ -5,3 +5,4 @@
     src: "{{ role_path }}/templates/osbws-argfile.j2"
     dest: "{{ oracle_osbws_installer_directory }}/osbws-argfile"
     owner: "{{ service_user_name }}"
+    remote_src: true
