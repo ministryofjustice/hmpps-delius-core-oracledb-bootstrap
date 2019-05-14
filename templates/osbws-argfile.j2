@@ -2,4 +2,4 @@
 -walletDir {{ oracle_database_oracle_home }}/dbs/osbws_wallet
 -libDir {{ oracle_database_oracle_home }}/lib
 -location {{ ansible_ec2_instance_identity_document_region }}
--awsEndPoint {{ oracledb_backups_s3bucket_domain }}
+-awsEndPoint s3.{{ ansible_ec2_instance_identity_document_region }}.amazonaws.com
