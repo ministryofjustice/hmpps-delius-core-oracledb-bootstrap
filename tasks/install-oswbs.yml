@@ -12,21 +12,21 @@
   become_user: "{{ service_user_name }}"
   register: install
   failed_when: install.rc !=0
-  # args:
-  #   creates: "{{ oracle_osbws_ora_file }}"
+  args:
+    creates: "{{ oracle_osbws_ora_file }}"
 
 # - name: debug
 #   debug:
 #     msg:
 #       - "{{ install }}"
 
-# - name: (main/install-osbws) Create symlink libosbws.so libobk.so
-#   file:
-#     src: "{{ oracle_database_oracle_home }}/lib/libosbws.so"
-#     dest: "{{ oracle_database_oracle_home }}/lib/libobk.so"
-#     owner: "{{ service_user_name }}"
-#     group: "{{ service_user_group }}"
-#     state: link
+- name: (main/install-osbws) Create symlink libosbws.so libobk.so
+  file:
+    src: "{{ oracle_database_oracle_home }}/lib/libosbws.so"
+    dest: "{{ oracle_database_oracle_home }}/lib/libobk.so"
+    owner: "{{ service_user_name }}"
+    group: "{{ service_user_group }}"
+    state: link
 
 - name: (main/install-osbws) Extract Oracle DB backups S3 bucket name from arn
   set_fact:
