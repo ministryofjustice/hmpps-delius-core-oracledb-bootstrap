@@ -12,6 +12,8 @@
   become_user: "{{ service_user_name }}"
   register: install
   failed_when: install.rc !=0
+  args:
+    creates: "{{ oracle_osbws_ora_file }}"
 
 # - name: debug
 #   debug:
@@ -30,11 +32,11 @@
   set_fact:
     oracledb_backups_bucket_name: "{{ oracledb_backups_bucket_arn | regex_replace('^arn:aws:s3:::','') }}"
 
-# - name: (main/install-osbws) Set OSB_WS_BUCKET
-#   lineinfile:
-#     path: "{{ oracle_osbws_ora_file }}"
-#     regexp: '^OSB_WS_BUCKET='
-#     line: "OSB_WS_BUCKET={{ oracledb_backups_bucket_name }}"
+- name: (main/install-osbws) Set OSB_WS_BUCKET
+  lineinfile:
+    path: "{{ oracle_osbws_ora_file }}"
+    regexp: '^OSB_WS_BUCKET='
+    line: "OSB_WS_BUCKET={{ oracledb_backups_bucket_name }}"
 
 
 - name: (main/install-osbws) Set OSB_WS_CHUNK_SIZE
