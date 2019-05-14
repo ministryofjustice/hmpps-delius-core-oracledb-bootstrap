@@ -25,3 +25,20 @@
     owner: "{{ service_user_name }}"
     group: "{{ service_user_group }}"
     state: link
+
+- name: (main/install-osbws) Extract Oracle DB backups S3 bucket name from arn
+  set_fact:
+    oracledb_backups_bucket_name: "{{ oracledb_backups_bucket_arn | regex_replace('^arn:aws:s3:::','') }}"
+
+# - name: (main/install-osbws) Set OSB_WS_BUCKET
+#   lineinfile:
+#     path: "{{ oracle_osbws_ora_file }}"
+#     regexp: '^OSB_WS_BUCKET='
+#     line: "OSB_WS_BUCKET={{ oracledb_backups_bucket_name }}"
+
+
+- name: (main/install-osbws) Set OSB_WS_CHUNK_SIZE
+  lineinfile:
+    path: "{{ oracle_osbws_ora_file }}"
+    regexp: '^OSB_WS_CHUNK_SIZE='
+    line: "OSB_WS_CHUNK_SIZE=524288000"
