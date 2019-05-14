@@ -8,7 +8,7 @@
     group: "{{ service_user_group }}"
 
 - name: (main/install-osbws) Install osbws
-  shell: ". /home/{{ service_user_name }}/.bash_profile && java -verbose -jar {{ oracle_osbws_installer_directory }}/osbws_install.jar -ARGFILE {{ oracle_osbws_installer_directory }}/osbws-argfile" # > /dev/null"
+  shell: ". /home/{{ service_user_name }}/.bash_profile && java -verbose -jar {{ oracle_osbws_installer_directory }}/osbws_install.jar -ARGFILE {{ oracle_osbws_installer_directory }}/osbws-argfile"
   become_user: "{{ service_user_name }}"
   register: install
   failed_when: install.rc !=0
@@ -20,13 +20,18 @@
 #     msg:
 #       - "{{ install }}"
 
-- name: (main/install-osbws) Create symlink libosbws.so libobk.so
+# - name: (main/install-osbws) Create symlink libosbws.so libobk.so
+#   file:
+#     src: "{{ oracle_database_oracle_home }}/lib/libosbws.so"
+#     path: "{{ oracle_database_oracle_home }}/lib/libobk.so"
+#     owner: "{{ service_user_name }}"
+#     group: "{{ service_user_group }}"
+#     state: link
+
+- name: (main/install-osbws) Remove symlink libosbws.so libobk.so
   file:
-    src: "{{ oracle_database_oracle_home }}/lib/libosbws.so"
-    dest: "{{ oracle_database_oracle_home }}/lib/libobk.so"
-    owner: "{{ service_user_name }}"
-    group: "{{ service_user_group }}"
-    state: link
+    path: "{{ oracle_database_oracle_home }}/lib/libobk.so"
+    state: absent
 
 - name: (main/install-osbws) Extract Oracle DB backups S3 bucket name from arn
   set_fact:
