@@ -20,6 +20,7 @@
   become_user: "{{ service_user_name }}"
   register: install
   failed_when: install.rc !=0
+  when: argfile.changed
 
 - name: (main/install-osbws) Extract Oracle DB backups S3 bucket name from arn
   set_fact:
