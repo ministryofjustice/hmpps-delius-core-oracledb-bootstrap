@@ -24,7 +24,7 @@
 
 - name: (main/install-osbws) Extract Oracle DB backups S3 bucket name from arn
   set_fact:
-    oracledb_backups_bucket_name: "{{ oracledb_backups_bucket_arn | regex_replace('^arn:aws:s3:::','') }}"
+    oracledb_backups_bucket_name: "{{ s3_oracledb_backups_arn | regex_replace('^arn:aws:s3:::','') }}"
 
 - name: (main/install-osbws) Set OSB_WS_BUCKET
   lineinfile:
