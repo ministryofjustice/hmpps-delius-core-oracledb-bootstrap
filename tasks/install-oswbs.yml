@@ -6,6 +6,11 @@
     dest: "{{ oracle_osbws_installer_directory }}/osbws-argfile"
     owner: "{{ service_user_name }}"
     group: "{{ service_user_group }}"
+  register: argfile
+
+- name: debug
+  debug:
+    msg: "{{ argfile }}"
 
 - name: (main/install-osbws) Install Oracle Secure Backup Web Service
   shell: |
