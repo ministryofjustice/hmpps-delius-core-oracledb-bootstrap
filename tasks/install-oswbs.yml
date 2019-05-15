@@ -7,18 +7,14 @@
     owner: "{{ service_user_name }}"
     group: "{{ service_user_group }}"
 
-- name: (main/install-osbws) Install osbws
-  shell: ". /home/{{ service_user_name }}/.bash_profile && java -verbose -jar {{ oracle_osbws_installer_directory }}/osbws_install.jar -ARGFILE {{ oracle_osbws_installer_directory }}/osbws-argfile"
+- name: (main/install-osbws) Install Oracle Secure Backup Web Service
+  shell: |
+          . /home/{{ service_user_name }}/.bash_profile && \
+          java -verbose -jar {{ oracle_osbws_installer_directory }}/osbws_install.jar \
+          -ARGFILE {{ oracle_osbws_installer_directory }}/osbws-argfile
   become_user: "{{ service_user_name }}"
   register: install
   failed_when: install.rc !=0
-  # args:
-  #   creates: "{{ oracle_osbws_ora_file }}"
-
-# - name: debug
-#   debug:
-#     msg:
-#       - "{{ install }}"
 
 - name: (main/install-osbws) Extract Oracle DB backups S3 bucket name from arn
   set_fact:
@@ -35,4 +31,4 @@
   lineinfile:
     path: "{{ oracle_osbws_ora_file }}"
     regexp: '^OSB_WS_CHUNK_SIZE='
-    line: "OSB_WS_CHUNK_SIZE=524288000"
+    line: "OSB_WS_CHUNK_SIZE={{ oracle_osbws_chunk_size }}"
