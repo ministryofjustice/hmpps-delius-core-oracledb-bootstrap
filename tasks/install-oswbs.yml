@@ -6,10 +6,6 @@
   register: osbws_ora_file
   become: true
 
-# - name: (main/install-osbws) Set fact instance_profile
-#   set_fact:
-#     instance_profile: "{{ ansible_ec2_iam_instance_profile_role | regex_replace('_type') }}"
-
 - name: (main/install-osbws) Set fact instance_profile
   set_fact:
     instance_profile: "{{ ansible_ec2_iam_info_instanceprofilearn.split('/')[1] }}"
