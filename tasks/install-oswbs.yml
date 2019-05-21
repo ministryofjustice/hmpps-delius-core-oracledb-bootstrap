@@ -1,5 +1,19 @@
 ---
 
+- name: (main/install-osbws) validate oracle_osbws_ora_file written
+  stat:
+    path: "{{ oracle_osbws_ora_file }}"
+  register: osbws_ora_file
+  become: true
+
+- name: (main/install-osbws) Set fact instance_profile
+  set_fact:
+    instance_profile: "{{ ansible_ec2_iam_info_instanceprofilearn.split('/')[1] }}"
+
+- name: (main/install-osbws) debug instance_profile
+  debug:
+    msg: "{{ instance_profile }}"
+
 - name: (main/install-osbws) Copy argfile file template
   template:
     src: "{{ role_path }}/templates/osbws-argfile.j2"
@@ -8,7 +22,7 @@
     group: "{{ service_user_group }}"
   register: argfile
 
-- name: debug
+- name: (main/install-osbws) debug argfile
   debug:
     msg: "{{ argfile }}"
 
@@ -21,7 +35,7 @@
   become_user: "{{ service_user_name }}"
   register: install
   failed_when: install.rc !=0
-  when: argfile.changed
+  when: argfile.changed or osbws_ora_file.stat.exists == false
 
 - name: (main/install-osbws) Extract Oracle DB backups S3 bucket name from arn
   set_fact:
