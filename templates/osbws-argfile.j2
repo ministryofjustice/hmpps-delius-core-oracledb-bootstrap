@@ -1,4 +1,4 @@
--IAMRole {{ ansible_ec2_iam_instance_profile_role | regex_replace('_type') }}
+-IAMRole {{ instance_profile }}
 -walletDir {{ oracle_database_oracle_home }}/dbs/osbws_wallet
 -libDir {{ oracle_database_oracle_home }}/lib
 -location {{ ansible_ec2_instance_identity_document_region }}
