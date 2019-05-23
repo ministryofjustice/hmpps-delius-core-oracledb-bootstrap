@@ -46,16 +46,43 @@
   become_user: "{{ service_user_name }}"
   shell: "{{ oracle_grid_oracle_home }}/bin/netca -silent -responsefile /tmp/netca.rsp"
 
-- name: (main/reconfigure-asm) run config of asm as oracle
-  become: true
+- name: (main/reconfigure-asm) Calulate number of disks for volume groups
+  set_fact:
+    data_disks_quantity: "{{ asm_disks_quantity|int / 2 }}"
+    data_disk_list: []
+    flash_disk_list: []
+
+- name: (main/reconfigure-asm) Construct data volume group disk list
+  set_fact:
+    data_disk_list: "{{ data_disk_list }} + [ '/dev/oracleasm/disks/ASMDISK{{item}}' ]"
+  with_sequence: count={{ data_disks_quantity|int }}
+
+- name: (main/reconfigure-asm) Construct flash volume group disk list
+  set_fact:
+    flash_disk_list: "{{ flash_disk_list }} + [ '/dev/oracleasm/disks/ASMDISK{{item}}' ]"
+  with_sequence: start={{ data_disks_quantity|int + 1 }} end={{ asm_disks_quantity }}
+
+- name: (main/reconfigure-asm) Run asmca to create DATA volume group
+  become: yes
   become_user: "{{ service_user_name }}"
   shell: "{{ oracle_grid_oracle_home }}/bin/asmca
-            -silent
-            -configureASM
-            -sysAsmPassword {{ sys_asm_password|default('d3l1u5ag41n') }}
-            -asmsnmpPassword {{ snmp_asm_password|default('d3l1u5ag41n') }}
-            -diskString '/dev/oracleasm/disks/ASMDISK*'
-            -diskGroupName DATA
-            -diskList /dev/oracleasm/disks/ASMDISK1
-            -redundancy EXTERNAL"
-  register: asm_result
+          -silent
+          -configureASM
+          -sysAsmPassword {{ sys_asm_password|default('d3l1u5ag41n') }}
+          -asmsnmpPassword {{ snmp_asm_password|default('d3l1u5ag41n') }}
+          -diskString '/dev/oracleasm/disks/ASMDISK*'
+          -diskGroupName DATA 
+          -redundancy EXTERNAL
+          -diskList {{ data_disk_list | join(',') }}"
+  register: data_asm_result
+
+- name: (main/reconfigure-asm) Run asmca to create FLASH volume group
+  become: yes
+  become_user: "{{ service_user_name }}"
+  shell: "{{ oracle_grid_oracle_home }}/bin/asmca
+          -silent
+          -createDiskGroup
+          -diskGroupName FLASH 
+          -redundancy EXTERNAL
+          -diskList {{ flash_disk_list | join(',') }}"
+  register: flash_asm_result

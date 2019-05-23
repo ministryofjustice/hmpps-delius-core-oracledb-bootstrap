@@ -41,9 +41,6 @@
     - name: (main) Configure and startup asm
       include: configure-asm.yml
 
-    - name: (main) Configure our flash disk groups
-      include: configure-disk-groups.yml
-
     - name: (main) Create our check file so we don't run this again
       file:
         path: "/home/{{ service_user_name }}/.grid_installed"
