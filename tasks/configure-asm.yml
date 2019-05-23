@@ -64,7 +64,7 @@
 
 - name: (main/reconfigure-asm) Run asmca to create DATA volume group
   become: yes
-  become_user: oracle
+  become_user: "{{ service_user_name }}"
   shell: "{{ oracle_grid_oracle_home }}/bin/asmca
           -silent
           -configureASM
@@ -78,7 +78,7 @@
 
 - name: (main/reconfigure-asm) Run asmca to create FLASH volume group
   become: yes
-  become_user: oracle
+  become_user: "{{ service_user_name }}"
   shell: "{{ oracle_grid_oracle_home }}/bin/asmca
           -silent
           -createDiskGroup
