@@ -132,8 +132,17 @@
 
     - name: (main) backup restored
       set_fact:
-        backup_restored: true
+        backup_restored: true   
+  when:
+    - database_type != "standby"
+    - database_bootstrap_restore|bool
+    - not backup_restored|bool
+    - grid_installed|bool
+    - oradb_installed|bool
+    - patches_applied|bool
+  tags: restore
 
+- block:
     - name: (main) Copy huge page script
       copy:
         src: "{{ role_path }}/files/hugepages.sh"
@@ -157,13 +166,11 @@
         module: ec2
         region: "{{ ansible_ec2_placement_region }}"
         instance_ids: '{{ ansible_ec2_instance_id }}'
-        state: restarted
-        
+        state: restarted   
   when:
     - database_type != "standby"
-    - database_bootstrap_restore|bool
-    - not backup_restored|bool
+    - backup_restored|bool
     - grid_installed|bool
     - oradb_installed|bool
     - patches_applied|bool
-  tags: restore
+  tags: restart
