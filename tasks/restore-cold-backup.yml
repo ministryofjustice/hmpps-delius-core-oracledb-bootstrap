@@ -12,9 +12,11 @@
       failed_when: sshmax_value.rc != 0
 
     - name: (main/restore-cold-backup) Set shmall value
-      command: "/usr/sbin/sysctl -w kernel.shmall={{ sshmax_value|int }}/{{ page_size|int }}| round(0,'ceil')"
+      command: "/usr/sbin/sysctl -w kernel.shmall={{ item }}"
       register: set_shmall
       failed_when: set_shmall.rc != 0
+      with_items:
+        - "{{ (sshmax_value.stdout|int / page_size.stdout|int)|string| regex_replace('(\\.*)','') }}"
 
 - name: (main/restore-cold-backup) Create dir for backup files
   file:
