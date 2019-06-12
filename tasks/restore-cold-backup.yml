@@ -12,9 +12,12 @@
       failed_when: sshmax_value.rc != 0
 
     - name: (main/restore-cold-backup) Set shmall value
-      command: "/usr/sbin/sysctl -w kernel.shmall={{ item }}"
-      register: set_shmall
-      failed_when: set_shmall.rc != 0
+      sysctl:
+        name: kernel.shmall
+        value: "{{ item }}"
+        reload: yes
+        state: present
+      ignore_errors: false
       with_items:
         - "{{ (sshmax_value.stdout|int / page_size.stdout|int)|string| regex_replace('(\\.*)','') }}"
 
