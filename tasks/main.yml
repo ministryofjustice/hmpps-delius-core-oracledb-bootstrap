@@ -151,26 +151,32 @@
 
     - name: (main) Execute huge page script
       shell: "/tmp/hugepages.sh"
-      register: hugepage_result
-      failed_when:  hugepage_result.rc != 0
+      register: hugepage_value
+      failed_when: hugepage_value.rc != 0
 
-    - name: (main) Configure kernel for hugepages
+    - name: (main) Find the value of hugepages already set
+      command: /usr/bin/more /proc/sys/vm/nr_hugepages
+      register: hugepage_result
+      failed_when: hugepage_result.rc != 0
+
+    - name: (main) Configure kernel for hugepages if required
       sysctl:
         name: "vm.nr_hugepages"
-        value: "{{ hugepage_result.stdout }}"
+        value: "{{ hugepage_value.stdout }}"
         state: present
-      when: hugepage_result.rc == 0
+      when: hugepage_result.stdout != hugepage_value.stdout
+     
+    - name: (main) Create our check file so we don't run this again
+      file:
+        path: "/home/{{ service_user_name }}/.hugepages_set"
+        state: touch
 
-    - name: (main) Restart ec2 database instance
-      local_action:
-        module: ec2
-        region: "{{ ansible_ec2_placement_region }}"
-        instance_ids: '{{ ansible_ec2_instance_id }}'
-        state: restarted   
+    - name: (main) hugepages set
+      set_fact:
+        hugepages_set: true  
+
   when:
     - database_type != "standby"
     - backup_restored|bool
-    - grid_installed|bool
-    - oradb_installed|bool
-    - patches_applied|bool
-  tags: restart
+    - not hugepages_set|bool
+  tags: hugepages

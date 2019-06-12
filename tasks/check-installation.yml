@@ -67,3 +67,20 @@
       set_fact:
         backup_restored: true
       when: backup_restored_check_file.stat.exists
+
+- block:
+    - name: (main/check-installation) validate hugepages set
+      stat:
+        path: "/home/{{ service_user_name }}/.hugepages_set"
+      register: hugepages_set_check_file
+      become: true
+
+    - name: (main/check-installation) is hugepages set (false)
+      set_fact:
+        hugepages_set: false
+      when: not hugepages_set_check_file.stat.exists
+
+    - name: (main/check-installation) is backup restored (true)
+      set_fact:
+        hugepages_set: true
+      when: hugepages_set_check_file.stat.exists
