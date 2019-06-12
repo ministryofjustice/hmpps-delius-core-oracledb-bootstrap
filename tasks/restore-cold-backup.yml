@@ -14,12 +14,10 @@
     - name: (main/restore-cold-backup) Set shmall value
       sysctl:
         name: kernel.shmall
-        value: 1073741824
+        value: "{{ (sshmax_value.stdout|int / page_size.stdout|int)|string| regex_replace('(\\\\.*)','')|int }}" # 1073741824
         reload: yes
         state: present
       ignore_errors: false
-      with_items:
-        - "{{ (sshmax_value.stdout|int / page_size.stdout|int)|string| regex_replace('(\\\\.*)','')|int }}"
 
 - name: (main/restore-cold-backup) Create dir for backup files
   file:
