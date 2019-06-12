@@ -14,7 +14,7 @@
     - name: (main/restore-cold-backup) Set shmall value
       sysctl:
         name: kernel.shmall
-        value: "{{ item }}"
+        value: 1073741824
         reload: yes
         state: present
       ignore_errors: false
