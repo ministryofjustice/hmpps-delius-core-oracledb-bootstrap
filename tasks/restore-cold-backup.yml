@@ -19,7 +19,7 @@
         state: present
       ignore_errors: false
       with_items:
-        - "{{ (sshmax_value.stdout|int / page_size.stdout|int)|string| regex_replace('(\\.*)','') }}"
+        - "{{ (sshmax_value.stdout|int / page_size.stdout|int)|string| regex_replace('(\\.*)','')|int }}"
 
 - name: (main/restore-cold-backup) Create dir for backup files
   file:
