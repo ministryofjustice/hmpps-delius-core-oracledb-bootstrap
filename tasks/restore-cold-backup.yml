@@ -9,7 +9,7 @@
     - name: (main/restore-cold-backup) Get shmmax value
       command: /usr/bin/more /proc/sys/kernel/shmmax
       register: sshmax_value
-      failed_when: sshmax_value.rc != 0
+      failed_when: sshmax_value.rc != 0  
 
     - name: (main/restore-cold-backup) Set shmall value
       sysctl:
@@ -19,7 +19,7 @@
         state: present
       ignore_errors: false
       with_items:
-        - "{{ (sshmax_value.stdout|int / page_size.stdout|int)|string| regex_replace('(\\.*)','')|int }}"
+        - "{{ (sshmax_value.stdout|int / page_size.stdout|int)|string| regex_replace('(\\\\.*)','')|int }}"
 
 - name: (main/restore-cold-backup) Create dir for backup files
   file:
