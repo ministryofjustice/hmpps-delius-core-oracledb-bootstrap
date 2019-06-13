@@ -7,19 +7,14 @@
       failed_when: page_size.rc != 0
     
     - name: (main/restore-cold-backup) Get shmmax value
-      command: /usr/bin/more /proc/sys/kernel/shmmax
+      command: /usr/bin/cat /proc/sys/kernel/shmmax
       register: sshmax_value
       failed_when: sshmax_value.rc != 0  
-
-    - name: (main/restore-cold-backup) Caculate shmall value
-      set_fact:
-        shmall_value: "{{ (sshmax_value.stdout|int / page_size.stdout|int)|string| regex_replace('(\\\\.*)','')|int }}"
-      ignore_errors: false
 
     - name: (main/restore-cold-backup) Set shmall value
       sysctl:
         name: kernel.shmall
-        value: 1073741824
+        value: "{{ (sshmax_value.stdout|int / page_size.stdout|int)|string| regex_replace('(\\.*)','')|int }}"
         reload: yes
         state: present
       ignore_errors: false
