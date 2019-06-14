@@ -1,5 +1,24 @@
 ---
 
+- block:
+    - name: (main/reconfigure-instance) Get the page size 
+      command: /usr/bin/getconf PAGE_SIZE
+      register: page_size
+      failed_when: page_size.rc != 0
+    
+    - name: (main/reconfigure-instance) Get shmmax value
+      command: /usr/bin/cat /proc/sys/kernel/shmmax
+      register: sshmax_value
+      failed_when: sshmax_value.rc != 0  
+
+    - name: (main/reconfigure-instance) Set shmall value
+      sysctl:
+        name: kernel.shmall
+        value: "{{ (sshmax_value.stdout|int / page_size.stdout|int)|string| regex_replace('(\\.*)','')|int }}"
+        reload: yes
+        state: present
+      ignore_errors: false
+
 - name: (main/reconfigure-instance) Update our service_users profile so that the ORACLE_HOSTNAME variable is correct and resolves
   include: update-service-user.yml
 

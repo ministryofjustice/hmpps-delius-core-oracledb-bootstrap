@@ -1,24 +1,5 @@
 ---
 
-- block:
-    - name: (main/restore-cold-backup) Get the page size 
-      command: /usr/bin/getconf PAGE_SIZE
-      register: page_size
-      failed_when: page_size.rc != 0
-    
-    - name: (main/restore-cold-backup) Get shmmax value
-      command: /usr/bin/cat /proc/sys/kernel/shmmax
-      register: sshmax_value
-      failed_when: sshmax_value.rc != 0  
-
-    - name: (main/restore-cold-backup) Set shmall value
-      sysctl:
-        name: kernel.shmall
-        value: "{{ (sshmax_value.stdout|int / page_size.stdout|int)|string| regex_replace('(\\.*)','')|int }}"
-        reload: yes
-        state: present
-      ignore_errors: false
-
 - name: (main/restore-cold-backup) Create dir for backup files
   file:
     path: "{{ database_backup_location }}"
@@ -36,10 +17,10 @@
   become_user: "{{ service_user_name }}"
 
 - name: (main/restore-cold-backup) Run script to restore from backup
-  shell: ". ~/.bash_profile; {{ database_backup_location }}/rman_backup_restore.sh -t {{ database_sid }} -l seed -d {{ database_backup_location }} "
+  shell: ". ~/.bash_profile; {{ database_backup_location }}/rman_backup_restore.sh -t {{ database_sid }} -l seed -d {{ database_backup_location }}"
   register: restoredb_r_result
   failed_when: restoredb_r_result.rc != 0
-  ignore_errors: true
+  ignore_errors: false
   become: true
   become_user: "{{ service_user_name }}"
-  no_log: true
+  no_log: false
