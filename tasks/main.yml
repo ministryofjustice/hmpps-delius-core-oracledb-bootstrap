@@ -155,7 +155,7 @@
       failed_when: hugepage_value.rc != 0
 
     - name: (main) Find the value of hugepages already set
-      command: /usr/bin/more /proc/sys/vm/nr_hugepages
+      command: /usr/bin/cat /proc/sys/vm/nr_hugepages
       register: hugepage_result
       failed_when: hugepage_result.rc != 0
 
