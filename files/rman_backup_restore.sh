@@ -518,7 +518,6 @@ restore_db_passwords () {
   if [ "$PRODUCT" = "delius" ]
   then
     DBUSERS+=(delius_app_schema delius_pool )
-    PRODUCT="oracle"
   fi
 
   info "Change password for db users"
@@ -532,6 +531,14 @@ restore_db_passwords () {
     fi
     SSMNAME="/${HMPPS_ENVIRONMENT}/${APPLICATION}/${PRODUCT}-database/db/${SUFFIX}"
     USERPASS=`aws ssm get-parameters --region ${REGION} --with-decryption --name ${SSMNAME} | jq -r '.Parameters[].Value'`
+    if [ -z ${USERPASS} ]
+    then
+      if [ "$PRODUCT" = "delius" ]
+      then
+        SSMNAME="/${HMPPS_ENVIRONMENT}/${APPLICATION}/oracle-database/db/$SUFFIX"
+        USERPASS=`aws ssm get-parameters --region ${REGION} --with-decryption --name ${SSMNAME} | jq -r '.Parameters[].Value'`
+      fi
+    fi
     [ -z ${USERPASS} ] && error "Password for $USER in aws parameter store ${SSMNAME} does not exist"
     info "Change password for $USER"
     sqlplus -s / as sysdba << EOF
