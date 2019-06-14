@@ -105,7 +105,6 @@
       include: install-oswbs.yml
   when:
     - grid_installed|bool
-    - oradb_installed|bool
     - patches_applied|bool
   tags: oswbs
 
