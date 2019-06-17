@@ -8,19 +8,19 @@ TIMESTAMP="${CURRDATE}${CURRHOUR}${CURRMIN}"
 
 info () {
   T=`date +"%D %T"`
-  echo -e "INFO : $THISSCRIPT : $T : $1" 
+  echo -e "INFO : $THISSCRIPT : $T : $1"
 }
 
 error () {
   T=`date +"%D %T"`
-  echo -e "ERROR : $THISSCRIPT : $T : $1" 
+  echo -e "ERROR : $THISSCRIPT : $T : $1"
   exit 1
 }
 
 set_ora_env () {
   ORAENV_ASK=NO
   ORACLE_SID=$1
-  . /usr/local/bin/oraenv > /dev/null 
+  . /usr/local/bin/oraenv > /dev/null
   unset SQLPATH
   unset TWO_TASK
   unset LD_LIBRARY_PATH
@@ -108,7 +108,7 @@ validate_parameters () {
 }
 
 download_seedbackup_from_s3() {
-  
+
   info "Sync S3 bucket with backup staging directory"
   . /etc/environment
   BUCKETDIRECTORYNAME="`echo $S3_ORACLEDB_BACKUPS_ARN | awk -F: '{print $NF}'`/seed/delius/"
@@ -127,10 +127,10 @@ check_rman_logfle_no () {
   [ $RMANLOGFILENO -ne 1 ] && error "RMAN ${PATTERN} logfile does not exist or more than one"
   RMANLOGFILE=`ls $STAGINGDIR/rman_backup_*${PATTERN}*.log`
   info "Rman log file = ${RMANLOGFILE}"
-} 
+}
 
 check_rman_logfile () {
-  
+
   info "Find correct log file"
   if [ "$LEVEL" = "0" ]
   then
@@ -178,7 +178,7 @@ restore_controlfile () {
   let i=0
   for CONTROLFILE in ` grep "output file name" $STAGINGDIR/rmanrestorecontrolfile.log | cut -d'=' -f2`
   do
-    i=`expr $i + 1` 
+    i=`expr $i + 1`
     [ $i -eq 1 ] && CONTROLFILE1=$CONTROLFILE
     [ $i -eq 2 ] && CONTROLFILE2=$CONTROLFILE
   done
@@ -187,7 +187,7 @@ restore_controlfile () {
   sed -e "s|.*control.*|\*\.control_files='$CONTROLFILE1','$CONTROLFILE2'|" ${TEMPPFILE} > ${PFILE}
 
   info "Mount instance with ${PFILE}"
-  sqlplus -s / as sysdba <<EOF 
+  sqlplus -s / as sysdba <<EOF
     shutdown abort
     startup mount pfile='${PFILE}'
     exit
@@ -202,7 +202,7 @@ EOF
 
 restore_database () {
 
-  if [ "$LEVEL" = "0" ] 
+  if [ "$LEVEL" = "0" ]
   then
     STARTWITH=level0
     TAG='DB_LEVEL0'
@@ -263,7 +263,7 @@ recover_database () {
 # Disable block change tracking if enabled otherwise it will fail
 # ------------------------------------------------------------------------------
 disable_block_change_tracking () {
-  
+
   info "Disable block change tracking if enabled otherwise it will fail"
   sqlplus -s / as sysdba <<EOF
   whenever sqlerror exit failure
@@ -271,13 +271,13 @@ disable_block_change_tracking () {
   declare
     v_status  v\$block_change_tracking.status%type;
   begin
-    select status into v_status from v\$block_change_tracking; 
+    select status into v_status from v\$block_change_tracking;
   exception
   when others then
-    execute immediate 'alter database disable block change tracking'; 
+    execute immediate 'alter database disable block change tracking';
   end;
   /
-    
+
 EOF
 }
 
@@ -291,9 +291,9 @@ rename_redologfiles () {
     whenever sqlerror exit failure
     set head off pages 1000 feed off termout off
     declare
-      cursor c1 is 
+      cursor c1 is
         select 'alter database rename file '||''''||member||''''||' to '||''''||decode(r,1,'+DATA',2,'+FLASH')||'''' cmd1,
-        case 
+        case
           when r = 2
           then
             'alter database clear logfile group '||group#
@@ -391,16 +391,16 @@ EOF
 # -------------------------------------------------------------------------------
 create_tempfiles () {
   info "Create temp files and drop other tempfiles"
-  sqlplus -s / as sysdba << EOF 
+  sqlplus -s / as sysdba << EOF
   whenever sqlerror exit failure
   set head off pages 1000 feed off termout off
   declare
-  cursor c1 is 
+  cursor c1 is
     select 'alter tablespace '||ts.name||' add tempfile '||''''||'+DATA'||'''' cmd1,
             'alter tablespace '||ts.name||' drop tempfile '||''''||tf.name||'''' cmd2
-	 from v\$tablespace ts,
-	      v\$tempfile tf
-	 where ts.ts# = tf.ts#;
+   from v\$tablespace ts,
+        v\$tempfile tf
+   where ts.ts# = tf.ts#;
     sql_stmt varchar2(400);
   begin
     for r1 in c1
@@ -438,7 +438,7 @@ EOF
   startup mount pfile='${PFILE}'
   alter database open resetlogs;
 EOF
-  
+
   [ $? -ne 0 ] && error "Changing database name and dbid" || info "Changed datbase name and dbid"
 }
 
@@ -447,7 +447,7 @@ EOF
 # ------------------------------------------------------------------------------
 add_to_crs () {
   info "Add database resource to CRS if not already"
-    sqlplus -s / as sysdba <<EOF 
+    sqlplus -s / as sysdba <<EOF
     shutdown immediate
     exit
 EOF
@@ -468,7 +468,7 @@ add_spfile_asm () {
 
   info "Create spfile on ASM"
   dbsid=`echo "${DBSID}" | tr '[:upper:]' '[:lower:]'`
-  sqlplus -s / as sysdba << EOF 
+  sqlplus -s / as sysdba << EOF
    create spfile='+DATA/${DBSID}/spfile${DBSID}.ora' from pfile;
 EOF
   [ $? -ne 0 ] && error "Creating spfile"
@@ -531,6 +531,9 @@ restore_db_passwords () {
     fi
     SSMNAME="/${HMPPS_ENVIRONMENT}/${APPLICATION}/${PRODUCT}-database/db/${SUFFIX}"
     USERPASS=`aws ssm get-parameters --region ${REGION} --with-decryption --name ${SSMNAME} | jq -r '.Parameters[].Value'`
+    ## TODO remove this condition
+    # until https://dsdmoj.atlassian.net/browse/DAM-183 (Delius DB password key conform to standards)
+    # is completed this block is a work around for the paramstore key no longer conforming to a standard.
     if [ -z ${USERPASS} ]
     then
       if [ "$PRODUCT" = "delius" ]
@@ -605,7 +608,7 @@ info "Oracle Sid = $DBSID"
 validate_parameters
 
 # ------------------------------------------------------------------------------
-# Create logfile 
+# Create logfile
 # ------------------------------------------------------------------------------
 LOGFILE=$STAGINGDIR/rmanrestore${LEVEL}_${TIMESTAMP}.log
 exec > >(tee -ia ${LOGFILE})
@@ -657,8 +660,8 @@ then
   RUNNING=`ps -ef | grep ora_smon_$DBSID | grep -v grep | wc -l`
   if [ $RUNNING -eq 1 ]
   then
-    info "Shutting down $DBSID" 
-    sqlplus -s / as sysdba <<EOF 
+    info "Shutting down $DBSID"
+    sqlplus -s / as sysdba <<EOF
     select sysdate from dual;
     shutdown abort;
 EOF
@@ -675,7 +678,7 @@ EOF
   info "Creating basic initialization parameter"
   echo "db_name=$DBSID" > $INITIALPFILE
   info "Startup nomount with pfile='$INITIALPFILE'"
-  sqlplus -s / as sysdba <<EOF 
+  sqlplus -s / as sysdba <<EOF
   startup nomount pfile='$INITIALPFILE'
 EOF
   [ $? -ne 0 ] && error "Starting nomount"
@@ -695,7 +698,7 @@ EOF
   # Create pfile from newly created spfile, edit entries and startup
   # ------------------------------------------------------------------------------
   info "Create new pfile from spfile"
-  sqlplus -s / as sysdba <<EOF 
+  sqlplus -s / as sysdba <<EOF
     create pfile from spfile='$ORACLE_HOME/dbs/spfile${DBSID}.ora';
     shutdown abort
     exit
