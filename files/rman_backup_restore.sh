@@ -513,7 +513,7 @@ restore_db_passwords () {
   info "Looking up passwords to in aws ssm parameter to restore by sourcing /etc/environment"
   . /etc/environment
 
-  PRODUCT=`echo $HMPPS_ROLE | cut -d- -f1`
+  PRODUCT=`echo $HMPPS_ROLE`
   DBUSERS=(sys system sysman dbsnmp)
   if [ "$PRODUCT" = "delius" ]
   then
@@ -531,17 +531,6 @@ restore_db_passwords () {
     fi
     SSMNAME="/${HMPPS_ENVIRONMENT}/${APPLICATION}/${PRODUCT}-database/db/${SUFFIX}"
     USERPASS=`aws ssm get-parameters --region ${REGION} --with-decryption --name ${SSMNAME} | jq -r '.Parameters[].Value'`
-    ## TODO remove this condition
-    # until https://dsdmoj.atlassian.net/browse/DAM-183 (Delius DB password key conform to standards)
-    # is completed this block is a work around for the paramstore key no longer conforming to a standard.
-    if [ -z ${USERPASS} ]
-    then
-      if [ "$PRODUCT" = "delius" ]
-      then
-        SSMNAME="/${HMPPS_ENVIRONMENT}/${APPLICATION}/oracle-database/db/$SUFFIX"
-        USERPASS=`aws ssm get-parameters --region ${REGION} --with-decryption --name ${SSMNAME} | jq -r '.Parameters[].Value'`
-      fi
-    fi
     [ -z ${USERPASS} ] && error "Password for $USER in aws parameter store ${SSMNAME} does not exist"
     info "Change password for $USER"
     sqlplus -s / as sysdba << EOF
