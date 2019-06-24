@@ -33,6 +33,22 @@
   include: check-installation.yml
   tags: always
 
+- name: Block inbound access on Oracle DB service port until bootstrap is finished
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    source: '!127.0.0.1'
+    destination_port: 1521
+    jump: REJECT
+    state: present
+  become: yes
+  when:
+    - not grid_installed|bool
+    - not oradb_installed|bool
+    - not patches_applied|bool
+    - not backup_restored|bool
+    - not hugepages_set|bool
+
 - name: (main) Reconfigure our config that was set during ami build
   include: reconfigure-instance.yml
   tags: always
@@ -131,7 +147,7 @@
 
     - name: (main) backup restored
       set_fact:
-        backup_restored: true   
+        backup_restored: true
   when:
     - database_type != "standby"
     - database_bootstrap_restore|bool
@@ -164,7 +180,7 @@
         value: "{{ hugepage_value.stdout }}"
         state: present
       when: hugepage_result.stdout != hugepage_value.stdout
-     
+
     - name: (main) Create our check file so we don't run this again
       file:
         path: "/home/{{ service_user_name }}/.hugepages_set"
@@ -172,10 +188,44 @@
 
     - name: (main) hugepages set
       set_fact:
-        hugepages_set: true  
+        hugepages_set: true
 
   when:
     - database_type != "standby"
     - backup_restored|bool
     - not hugepages_set|bool
   tags: hugepages
+
+- block:
+    - name: Re-enable inbound access on Oracle DB service port
+      iptables:
+        chain: INPUT
+        protocol: tcp
+        source: '!127.0.0.1'
+        destination_port: 1521
+        jump: REJECT
+        state: absent
+      become: yes
+  when:
+    - database_type != "primary"
+    - grid_installed|bool
+    - patches_applied|bool
+
+
+- block:
+    - name: Re-enable inbound access on Oracle DB service port
+      iptables:
+        chain: INPUT
+        protocol: tcp
+        source: '!127.0.0.1'
+        destination_port: 1521
+        jump: REJECT
+        state: absent
+      become: yes
+  when:
+    - database_type != "standby"
+    - grid_installed|bool
+    - oradb_installed|bool
+    - patches_applied|bool
+    - backup_restored|bool
+    - hugepages_set|bool
