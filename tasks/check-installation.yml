@@ -84,3 +84,20 @@
       set_fact:
         hugepages_set: true
       when: hugepages_set_check_file.stat.exists
+
+- block:
+    - name: (main/check-installation) validate ready for ha
+      stat:
+        path: "/home/{{ service_user_name }}/.ready_for_ha"
+      register: ready_for_ha_check_file
+      become: true
+
+    - name: (main/check-installation) is hugepages set (false)
+      set_fact:
+        ready_for_ha: false
+      when: not ready_for_ha_check_file.stat.exists
+
+    - name: (main/check-installation) is backup restored (true)
+      set_fact:
+        ready_for_ha: true
+      when: ready_for_ha_check_file.stat.exists

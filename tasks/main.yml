@@ -33,22 +33,6 @@
   include: check-installation.yml
   tags: always
 
-- name: Block inbound access on Oracle DB service port until bootstrap is finished
-  iptables:
-    chain: INPUT
-    protocol: tcp
-    source: '!127.0.0.1'
-    destination_port: 1521
-    jump: REJECT
-    state: present
-  become: yes
-  when:
-    - not grid_installed|bool
-    - not oradb_installed|bool
-    - not patches_applied|bool
-    - not backup_restored|bool
-    - not hugepages_set|bool
-
 - name: (main) Reconfigure our config that was set during ami build
   include: reconfigure-instance.yml
   tags: always
@@ -197,31 +181,21 @@
   tags: hugepages
 
 - block:
-    - name: Re-enable inbound access on Oracle DB service port
-      iptables:
-        chain: INPUT
-        protocol: tcp
-        source: '!127.0.0.1'
-        destination_port: 1521
-        jump: REJECT
-        state: absent
-      become: yes
+    - name: (main) Create DB ready for HA check file standby
+      file:
+        path: "/home/{{ service_user_name }}/.ready_for_ha"
+        state: touch
   when:
     - database_type != "primary"
     - grid_installed|bool
     - patches_applied|bool
-
+    - not ready_for_ha|bool
 
 - block:
-    - name: Re-enable inbound access on Oracle DB service port
-      iptables:
-        chain: INPUT
-        protocol: tcp
-        source: '!127.0.0.1'
-        destination_port: 1521
-        jump: REJECT
-        state: absent
-      become: yes
+    - name: (main) Create DB ready for HA check file primary
+      file:
+        path: "/home/{{ service_user_name }}/.ready_for_ha"
+        state: touch
   when:
     - database_type != "standby"
     - grid_installed|bool
@@ -229,3 +203,4 @@
     - patches_applied|bool
     - backup_restored|bool
     - hugepages_set|bool
+    - not ready_for_ha|bool
