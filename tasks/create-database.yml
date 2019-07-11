@@ -5,6 +5,7 @@
     src: "{{ role_path }}/templates/dbca.rsp.j2"
     dest: "/tmp/dbca.rsp"
     owner: "{{ service_user_name }}"
+    mode: 0400
 
 - name: (main/create-database) Copy our database template
   copy:
@@ -18,3 +19,9 @@
   become: true
   become_user: "{{ service_user_name }}"
   register: command_result
+
+- name: (main/create-database) Remove dbca response file after successful database creation
+  file:
+    path: /tmp/dbca.rsp
+    state: absent
+  when: command_result.stdout is search("100%")
