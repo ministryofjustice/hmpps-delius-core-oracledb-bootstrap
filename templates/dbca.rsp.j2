@@ -4,7 +4,7 @@ OPERATION_TYPE="createDatabase"
 
 [CREATEDATABASE]
 GDBNAME={{ database_global_database_name }}
-SID={{ database_sid|default('TEST') }}
+SID={{ database_sid }}
 TEMPLATENAME="{{ oracle_dbca_template_file }}.dbc"
 SYSPASSWORD="{{ oradb_sys_password }}"
 SYSTEMPASSWORD="{{ oradb_system_password }}"
