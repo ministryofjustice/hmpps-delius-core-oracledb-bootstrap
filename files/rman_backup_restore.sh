@@ -466,6 +466,8 @@ EOF
 # ------------------------------------------------------------------------------
 add_spfile_asm () {
 
+  info "Rename original ${SPFILE}"
+  mv ${SPFILE} ${SPFILE}.bak
   info "Create spfile on ASM"
   dbsid=`echo "${DBSID}" | tr '[:upper:]' '[:lower:]'`
   sqlplus -s / as sysdba << EOF
@@ -481,8 +483,7 @@ EOF
 # Catbundle PSU and OJVM postinstall
 # ------------------------------------------------------------------------------
 apply_psu_jvm_sql () {
-  info "Rename original ${SPFILE}"
-  mv ${SPFILE} ${SPFILE}.bak
+ 
   info "Apply catbundle PSU and OJVM postinstall, check apply_psu_ojvm.log for progress"
   set_ora_env ${DBSID}
   sqlplus -s / as sysdba << EOF >> apply_psu_ojvm.log
