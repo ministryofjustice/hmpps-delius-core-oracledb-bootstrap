@@ -534,7 +534,7 @@ restore_db_passwords () {
     [ -z ${USERPASS} ] && error "Password for $USER in aws parameter store ${SSMNAME} does not exist"
     info "Change password for $USER"
     sqlplus -s / as sysdba << EOF
-    alter user $USER identified by $USERPASS;
+    alter user $USER identified by "${USERPASS}";
     exit
 EOF
   done
