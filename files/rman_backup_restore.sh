@@ -519,12 +519,15 @@ restore_db_passwords () {
   if [ "$PRODUCT" = "delius" ]
   then
     DBUSERS+=(delius_app_schema delius_pool )
+  elif [ "$PRODUCT" = "mis" ]
+  then
+    DBUSERS+=(mis_landing ndmis_abc ndmis_cdc_subscriber ndmis_loader ndmis_working ndmis_data)
   fi
 
   info "Change password for db users"
   for USER in ${DBUSERS[@]}
   do
-    if [[ ${USER} =~ ^delius.* ]]
+    if [[ ! ${USER} =~ ^oradb.* ]]
     then
       SUFFIX=${USER}_password
     else
@@ -544,15 +547,18 @@ EOF
 post_actions () {
   if [ "$LEVEL" != "seed" ]
   then
-    disable_block_change_tracking
-    rename_redologfiles
-    add_drop_redologfiles
-    create_tempfiles
-    change_database_name
-    add_spfile_asm
-    add_to_crs
-    apply_psu_jvm_sql
-    reset_db_domain
+    if [ "$FINAL" = "Y" -o "$LEVEL" = "cold" ]
+    then
+      disable_block_change_tracking
+      rename_redologfiles
+      add_drop_redologfiles
+      create_tempfiles
+      change_database_name
+      add_spfile_asm
+      add_to_crs
+      apply_psu_jvm_sql
+      restore_db_passwords
+    fi
   else
     sqlplus -s / as sysdba <<EOF
     alter database open resetlogs;
@@ -562,8 +568,8 @@ EOF
     change_database_name
     add_spfile_asm
     add_to_crs
+    restore_db_passwords
   fi
-  restore_db_passwords
 }
 
 # ------------------------------------------------------------------------------
@@ -715,6 +721,7 @@ EOF
       -e "s|^.*audit_file_dest.*|\*\.audit_file_dest='/u01/app/oracle/admin/${DBSID}/adump'|" \
       -e "s|^.*diagnostic_dest.*|\*\.diagnostic_dest='/u01/app/oracle'|" \
       -e "s|^.*db_recovery_file_dest.*|\*\.db_recovery_file_dest='+FLASH'|" \
+      -e "/^.*log_archive_dest.*/d" \
       -e "$ a *.db_unique_name='${DBSID}'" \
       -e "$ a *.db_recovery_file_dest='+FLASH'" \
       -e "$ a *.db_create_file_dest='+DATA'" \
