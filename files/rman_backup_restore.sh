@@ -5,6 +5,7 @@ CURRDATE=`date +"20%y%m%d"`
 CURRHOUR=`date +"%H"`
 CURRMIN=`date +"%M"`
 TIMESTAMP="${CURRDATE}${CURRHOUR}${CURRMIN}"
+CPU_COUNT=`grep processor /proc/cpuinfo | wc -l`
 
 info () {
   T=`date +"%D %T"`
@@ -82,11 +83,12 @@ usage () {
   echo ""
   echo "Usage:"
   echo ""
-  echo "  $THISSCRIPT -t <targetsid> -l <level> -d <stagedir>"
+  echo "  $THISSCRIPT -t <targetsid> -l <level> -d <stagedir> -f <final>"
   echo ""
   echo "  targetsid = target oracle sid"
   echo "  level     = incremental level [0|1|cold|seed]"
   echo "  stagedir  = RMAN backup directory"
+  echo "  final     = final incremental [Y|N] default N"
   echo ""
   exit 1
 }
@@ -104,6 +106,11 @@ validate_parameters () {
 
   [ ! -d $STAGINGDIR ] && error "Staging directory does not exist or incorrect permissions"
   info "Staging Directory =  $STAGINGDIR"
+
+  case $FINAL in
+    N|Y) info "Final incremental = $FINAL" ;;
+      *) error "Please secify correct final flag" ;;
+  esac
 
 }
 
@@ -226,12 +233,16 @@ restore_database () {
   echo "run "                                           >> $RMANRESTORECMD
   echo "{"                                              >> $RMANRESTORECMD
   echo "  set newname for database to '+DATA';"         >> $RMANRESTORECMD
-  echo "  allocate channel ch1 device type disk;"       >> $RMANRESTORECMD
-  echo "  allocate channel ch2 device type disk;"       >> $RMANRESTORECMD
+  for (( i=1; i<=${CPU_COUNT}; i++ ))
+  do
+    echo "  allocate channel ch${i} device type disk;"  >> $RMANRESTORECMD
+  done
   echo "  restore database from tag='${TAG}';"          >> $RMANRESTORECMD
   echo "  switch datafile all;"                         >> $RMANRESTORECMD
-  echo "  release channel ch1;"                         >> $RMANRESTORECMD
-  echo "  release channel ch2;"                         >> $RMANRESTORECMD
+  for (( i=1; i<=${CPU_COUNT}; i++ ))
+  do
+    echo "  release channel ch${i};"                    >> $RMANRESTORECMD
+  done
   echo "}"                                              >> $RMANRESTORECMD
   rman target /  cmdfile $RMANRESTORECMD log $RMANRESTORELOG >/dev/null
   [ $? -ne 0 ] && error "Restoring ${STARTWITH} backup" || info "Restored ${STARTWITH} backup"
@@ -250,9 +261,15 @@ recover_database () {
   echo "catalog start with '${STAGINGDIR}/level${LEVEL}';" > $RMANRECOVERCMD
   echo "run"						>> $RMANRECOVERCMD
   echo "{"						>> $RMANRECOVERCMD
-  echo "  allocate channel ch1 device type disk;"  	>> $RMANRECOVERCMD
+  for (( i=1; i<=${CPU_COUNT}; i++ ))
+  do
+    echo "  allocate channel ch${i} device type disk;"  >> $RMANRECOVERCMD
+  done
   echo "  recover database until scn ${SCN};"		>> $RMANRECOVERCMD
-  echo "  release channel ch1;"				>> $RMANRECOVERCMD
+  for (( i=1; i<=${CPU_COUNT}; i++ ))
+  do
+    echo "  release channel ch${i};"  >> $RMANRECOVERCMD
+  done
   echo "}"						>> $RMANRECOVERCMD
   rman target /  cmdfile $RMANRECOVERCMD log $RMANRECOVERLOG >/dev/null
   [ $? -ne 0 ] && error "Recovering level 1 backup" || info "Recovered level 1 backup"
@@ -515,21 +532,28 @@ restore_db_passwords () {
   . /etc/environment
 
   PRODUCT=`echo $HMPPS_ROLE`
-  DBUSERS=(sys system sysman dbsnmp)
+  SYSTEMDBUSERS=(sys system sysman dbsnmp)
   if [ "$PRODUCT" = "delius" ]
   then
     DBUSERS+=(delius_app_schema delius_pool )
+  elif [ "$PRODUCT" = "mis" ]
+  then
+    DBUSERS+=(mis_landing ndmis_abc ndmis_cdc_subscriber ndmis_loader ndmis_working ndmis_data)
   fi
 
-  info "Change password for db users"
+  info "Change password for all db users"
+  DBUSERS+=( ${SYSTEMDBUSERS[@]} )
   for USER in ${DBUSERS[@]}
   do
-    if [[ ${USER} =~ ^delius.* ]]
-    then
-      SUFFIX=${USER}_password
-    else
-      SUFFIX=oradb_${USER}_password
-    fi
+    SUFFIX=${USER}_password
+    for SYSTEMDBUSER in ${SYSTEMDBUSERS[@]}
+    do
+      if [ "${USER}" = "${SYSTEMDBUSER}" ]
+      then
+        SUFFIX=oradb_${USER}_password
+        break
+      fi
+    done
     SSMNAME="/${HMPPS_ENVIRONMENT}/${APPLICATION}/${PRODUCT}-database/db/${SUFFIX}"
     USERPASS=`aws ssm get-parameters --region ${REGION} --with-decryption --name ${SSMNAME} | jq -r '.Parameters[].Value'`
     [ -z ${USERPASS} ] && error "Password for $USER in aws parameter store ${SSMNAME} does not exist"
@@ -544,15 +568,18 @@ EOF
 post_actions () {
   if [ "$LEVEL" != "seed" ]
   then
-    disable_block_change_tracking
-    rename_redologfiles
-    add_drop_redologfiles
-    create_tempfiles
-    change_database_name
-    add_spfile_asm
-    add_to_crs
-    apply_psu_jvm_sql
-    reset_db_domain
+    if [ "$FINAL" = "Y" -o "$LEVEL" = "cold" ]
+    then
+      disable_block_change_tracking
+      rename_redologfiles
+      add_drop_redologfiles
+      create_tempfiles
+      change_database_name
+      add_spfile_asm
+      add_to_crs
+      apply_psu_jvm_sql
+      restore_db_passwords
+    fi
   else
     sqlplus -s / as sysdba <<EOF
     alter database open resetlogs;
@@ -562,8 +589,8 @@ EOF
     change_database_name
     add_spfile_asm
     add_to_crs
+    restore_db_passwords
   fi
-  restore_db_passwords
 }
 
 # ------------------------------------------------------------------------------
@@ -580,13 +607,14 @@ info "Retrieving arguments"
 DBSID=UNSPECIFIED
 LEVEL=UNSPECIFIED
 STAGINGDIR=UNSPECIFIED
-
-while getopts "t:l:d:" opt
+FINAL=N
+while getopts "t:l:d:f:" opt
 do
   case $opt in
     t) DBSID=$OPTARG ;;
     l) LEVEL=$OPTARG ;;
     d) STAGINGDIR=$OPTARG ;;
+    f) FINAL=$OPTARG ;;
     *) usage ;;
   esac
 done
@@ -715,6 +743,7 @@ EOF
       -e "s|^.*audit_file_dest.*|\*\.audit_file_dest='/u01/app/oracle/admin/${DBSID}/adump'|" \
       -e "s|^.*diagnostic_dest.*|\*\.diagnostic_dest='/u01/app/oracle'|" \
       -e "s|^.*db_recovery_file_dest.*|\*\.db_recovery_file_dest='+FLASH'|" \
+      -e "/^.*log_archive_dest.*/d" \
       -e "$ a *.db_unique_name='${DBSID}'" \
       -e "$ a *.db_recovery_file_dest='+FLASH'" \
       -e "$ a *.db_create_file_dest='+DATA'" \
