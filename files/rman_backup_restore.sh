@@ -361,9 +361,9 @@ add_drop_redologfiles () {
 
       select min(group#), max(group#) into v_mingroup_no, v_maxgroup_no from v\$log;
 
-      for i in (v_maxgroup_no+1)..(v_maxgroup_no+3)
+      for i in (v_maxgroup_no+1)..(v_maxgroup_no+4)
       loop
-        execute immediate 'alter database add logfile group '||i||' size 500m';
+        execute immediate 'alter database add logfile group '||i||' size 1g';
       end loop;
 
       select group# into v_current_group_no from v\$log where status = 'CURRENT';
