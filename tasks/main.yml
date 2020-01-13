@@ -35,7 +35,7 @@
 
 - name: (main) Reconfigure our config that was set during ami build
   include: reconfigure-instance.yml
-  tags: alway
+  tags: always
 
 - block:
     - name: (main) Configure and startup asm
