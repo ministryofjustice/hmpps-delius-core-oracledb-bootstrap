@@ -72,6 +72,13 @@
     - database_type != "standby"
   tags: create_db
 
+- name: (main) Setup TAF Service Name
+  include: set-taf-service.yml
+  when:
+    - grid_installed|default(false)
+    - database_type != "standby"
+  tags: service
+
 - block:
     - name: (main) Install OPatch utility
       include: patch-oracle.yml
