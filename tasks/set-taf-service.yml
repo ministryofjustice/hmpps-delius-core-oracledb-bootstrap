@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 - name: (main/set-taf-service) Add taf service {{ database_taf_service }} to {{ database_primary_unique }}
+=======
+- name: (main/set-taf-service) Add taf service
+>>>>>>> 66c555e5f7c6e75b43db25c603dd30a234c4673f
   shell: |
     . ~/.bash_profile
     ORAENV_ASK=NO
