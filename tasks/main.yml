@@ -223,24 +223,27 @@
          repo: 'https://github.com/ministryofjustice/hmpps-env-configs'
          dest: ~/.hmpps-env-configs
 
-    - name: (main) Get Environment Configuration
-      slurp:
+   - name: Slurp file
+     slurp:
         src: /etc/environment
-      register: environmentfile
+     register: environmentfile
 
-    - name: Get Name of this Environment
-      set_fact:
-         this_environment: "{{ environmentfile['content'] | b64decode | regex_search('HMPPS_ENVIRONMENT=\".*\"') | regex_replace('HMPPS_ENVIRONMENT=\"(.*)\"','\\1') }}"
+   - name: Set Environment
+     set_fact:
+      this_environment: "{{ environmentfile['content'] | b64decode | regex_search('HMPPS_ENVIRONMENT=\".*\"') | regex_replace('HMPPS_ENVIRONMENT=\"(.*)\"','\\1') }}"
 
-    - name: Get Patch Information for Primary
-      include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/delius_primarydb.yml"
-      when: database_type == "primary"
+   - name: Show it
+     debug: var=this_environment
 
-    - name: Get Patch Information for Standby (Standby 1 and 2 should be equivalent)
-      include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/delius_standbydb1.yml"
-      when: database_type == "standby"
+   - name: Get Patch Information for Primary
+     include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/delius_primarydb.yml"
+     when: database_type == "primary"
 
-   - name: Get Patch Information for All if not defined at Host Level
+   - name: Get Patch Information for Standby
+     include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/delius_primarydb.yml"
+     when: database_type == "primary"
+
+   - name: Get Patch Information for All
      include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/all.yml"
      when: required_patches is not defined
 
