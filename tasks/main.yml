@@ -255,9 +255,3 @@
           target_host: localhost
           environment_name: "{{ this_environment }}"
           required_patches: "{{ required_patches }}"
-  when:
-      - grid_installed|bool
-      - oradb_installed|bool
-      - patches_applied|bool
-      - backup_restored|bool
-      - hugepages_set|bool
