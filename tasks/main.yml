@@ -249,7 +249,7 @@
 
     - name: Rename Required Patches
       set_fact:
-         dict_required_patches: "{{ required_patches }}
+         dict_required_patches: "{{ required_patches }}"
 
     - name: Show Required Patches
       debug: var=required_patches
