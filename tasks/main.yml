@@ -247,6 +247,9 @@
       include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/all.yml"
       when: required_patches is not defined
 
+    - name: Show Required Patches
+      debug: var=required_patches
+
     - name: Install Patches
       include_role:
         name: oracle-db-patches
