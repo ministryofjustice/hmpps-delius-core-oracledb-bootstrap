@@ -241,7 +241,7 @@
       when: database_type == "standby"
 
    - name: Get Patch Information for All if not defined at Host Level
-     include_vars: "~/.hmpps-env-configs/{{ your_environment }}/ansible/group_vars/all.yml"
+     include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/all.yml"
      when: required_patches is not defined
 
    - name: Install Patches
