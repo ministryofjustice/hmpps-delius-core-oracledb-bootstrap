@@ -247,6 +247,10 @@
       include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/all.yml"
       when: required_patches is not defined
 
+    - name: Rename Required Patches
+      set_fact:
+         dict_required_patches: "{{ required_patches }}
+
     - name: Show Required Patches
       debug: var=required_patches
 
@@ -257,4 +261,4 @@
           install_absent_patches: true
           target_host: localhost
           environment_name: "{{ this_environment }}"
-          required_patches: "{{ required_patches }}"
+          required_patches: "{{ dict_required_patches }}"
