@@ -223,38 +223,38 @@
          repo: 'https://github.com/ministryofjustice/hmpps-env-configs'
          dest: ~/.hmpps-env-configs
 
-   - name: Slurp file
-     slurp:
-        src: /etc/environment
-     register: environmentfile
+    - name: Slurp file
+      slurp:
+          src: /etc/environment
+      register: environmentfile
 
-   - name: Set Environment
-     set_fact:
-      this_environment: "{{ environmentfile['content'] | b64decode | regex_search('HMPPS_ENVIRONMENT=\".*\"') | regex_replace('HMPPS_ENVIRONMENT=\"(.*)\"','\\1') }}"
+    - name: Set Environment
+      set_fact:
+        this_environment: "{{ environmentfile['content'] | b64decode | regex_search('HMPPS_ENVIRONMENT=\".*\"') | regex_replace('HMPPS_ENVIRONMENT=\"(.*)\"','\\1') }}"
 
-   - name: Show it
-     debug: var=this_environment
+    - name: Show it
+      debug: var=this_environment
 
-   - name: Get Patch Information for Primary
-     include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/delius_primarydb.yml"
-     when: database_type == "primary"
+    - name: Get Patch Information for Primary
+      include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/delius_primarydb.yml"
+      when: database_type == "primary"
 
-   - name: Get Patch Information for Standby
-     include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/delius_primarydb.yml"
-     when: database_type == "primary"
+    - name: Get Patch Information for Standby
+      include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/delius_primarydb.yml"
+      when: database_type == "primary"
 
-   - name: Get Patch Information for All
-     include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/all.yml"
-     when: required_patches is not defined
+    - name: Get Patch Information for All
+      include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/all.yml"
+      when: required_patches is not defined
 
-   - name: Install Patches
-     include_role:
-       name: oracle-db-patches
-     vars:
-        install_absent_patches: true
-        target_host: localhost
-        environment_name: "{{ this_environment }}"
-        required_patches: "{{ required_patches }}"
+    - name: Install Patches
+      include_role:
+        name: oracle-db-patches
+      vars:
+          install_absent_patches: true
+          target_host: localhost
+          environment_name: "{{ this_environment }}"
+          required_patches: "{{ required_patches }}"
   when:
       - grid_installed|bool
       - oradb_installed|bool
