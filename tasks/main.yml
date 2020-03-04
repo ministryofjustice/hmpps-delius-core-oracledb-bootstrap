@@ -263,7 +263,6 @@
              install_absent_patches: true
              target_host: localhost
              environment_name: "{{ this_environment }}"
-             required_patches: "{{ dict_required_patches }}"
+            #  required_patches: "{{ dict_required_patches }}"
       become: true
       become_user: oracle
-
