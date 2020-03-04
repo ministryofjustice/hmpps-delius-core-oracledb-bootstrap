@@ -264,6 +264,10 @@
              target_host: localhost
              environment_name: "{{ this_environment }}"
              required_patches: "{{ dict_required_patches }}"
+<<<<<<< HEAD
              ansible_become: true
              ansible_user: oracle
 
+=======
+      become_user: oracle
+>>>>>>> parent of 68c50d2... How do we run this as Oracle
