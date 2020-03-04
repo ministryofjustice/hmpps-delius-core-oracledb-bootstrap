@@ -255,11 +255,13 @@
     - name: Show Required Patches
       debug: var=required_patches
 
-    - name: Install Patches
-      include_role:
-        name: oracle-db-patches
-      vars:
-          install_absent_patches: true
-          target_host: localhost
-          environment_name: "{{ this_environment }}"
-          required_patches: "{{ dict_required_patches }}"
+    - block:
+       - name: Install Patches
+         include_role:
+           name: oracle-db-patches
+         vars:
+             install_absent_patches: true
+             target_host: localhost
+             environment_name: "{{ this_environment }}"
+             required_patches: "{{ dict_required_patches }}"
+      become_user: oracle
