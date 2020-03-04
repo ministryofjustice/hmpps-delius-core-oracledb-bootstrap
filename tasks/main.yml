@@ -247,11 +247,6 @@
       include_vars: "~/.hmpps-env-configs/{{ this_environment }}/ansible/group_vars/all.yml"
       when: required_patches is not defined
 
-    # Workaround for Ansible Bug: Crash when try to pass variable to role with the same name as it is in role #39369
-    - name: Rename Required Patches
-      set_fact:
-         dict_required_patches: "{{ required_patches }}"
-
     - name: Show Required Patches
       debug: var=required_patches
 
@@ -263,6 +258,5 @@
              install_absent_patches: true
              target_host: localhost
              environment_name: "{{ this_environment }}"
-            #  required_patches: "{{ dict_required_patches }}"
       become: true
       become_user: oracle
