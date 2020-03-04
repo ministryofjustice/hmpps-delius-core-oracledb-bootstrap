@@ -264,5 +264,6 @@
              target_host: localhost
              environment_name: "{{ this_environment }}"
              required_patches: "{{ dict_required_patches }}"
-      become: true
-      become_user: oracle
+             ansible_become: true
+             ansible_user: oracle
+
