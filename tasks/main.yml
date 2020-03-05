@@ -261,8 +261,6 @@
       file:
          path: ~/.hmpps-env-configs
          state: absent
-Status
-
   when:
     - grid_installed|bool
     - oradb_installed|bool or database_type == "standby"
