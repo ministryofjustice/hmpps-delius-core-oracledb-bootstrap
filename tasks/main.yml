@@ -108,9 +108,6 @@
     - database_type != "standby"
   tags: service
 
-
- Not Required for Local Instance
- ===============================
 - block:
     - name: (main) Install Oracle Secure Web Backup Service (oswbs)
       include: install-oswbs.yml
@@ -215,6 +212,7 @@
     - backup_restored|bool
     - hugepages_set|bool
     - not ready_for_ha|bool
+
 
 # Install all one-off patches specified for this environment
 - block:
