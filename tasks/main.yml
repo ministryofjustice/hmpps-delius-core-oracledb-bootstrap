@@ -226,8 +226,6 @@
       - "grid_installed - {{grid_installed}}"
       - "oradb_installed - {{oradb_installed}}"
       - "patches_applied - {{patches_applied}}"
-    verbosity: 2
-  tags: always
 
 # Install all one-off patches specified for this environment
 - block:
