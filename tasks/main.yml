@@ -19,9 +19,9 @@
   when: not service_user_group|default(false)
   tags: always
 
-# - name: (main) Get our instance facts
-#   ec2_metadata_facts:
-#   tags: always
+- name: (main) Get our instance facts
+  ec2_metadata_facts:
+  tags: always
 
 - name: (main) Display database type
   debug:
@@ -215,17 +215,6 @@
     - backup_restored|bool
     - hugepages_set|bool
     - not ready_for_ha|bool
-
-
-- name: (main) Display database_bootstrap_restore var 2
-  debug:
-    msg:
-      - "database_type - {{database_type}}"
-      - "database_bootstrap_restore - {{database_bootstrap_restore}}"
-      - "backup_restored - {{backup_restored}}"
-      - "grid_installed - {{grid_installed}}"
-      - "oradb_installed - {{oradb_installed}}"
-      - "patches_applied - {{patches_applied}}"
 
 # Install all one-off patches specified for this environment
 - block:
