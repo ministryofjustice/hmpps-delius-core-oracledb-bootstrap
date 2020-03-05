@@ -269,3 +269,11 @@
              environment_name: "{{ hmpps_environment }}"
       become: true
       become_user: oracle
+  when:
+    - database_type != "standby"
+    - grid_installed|bool
+    - oradb_installed|bool
+    - patches_applied|bool
+    - backup_restored|bool or not database_bootstrap_restore|bool
+    - hugepages_set|bool
+    - not ready_for_ha|bool
