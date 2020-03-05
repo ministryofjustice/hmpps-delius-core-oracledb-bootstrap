@@ -256,6 +256,13 @@
              environment_name: "{{ hmpps_environment }}"
       become: true
       become_user: oracle
+
+    - name: Remove Environment Configuration Files (now finished with them)
+      file:
+         path: ~/.hmpps-env-configs
+         state: absent
+Status
+
   when:
     - grid_installed|bool
     - oradb_installed|bool or database_type == "standby"
