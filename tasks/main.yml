@@ -236,6 +236,10 @@
       set_fact:
         hmpps_role: "{{ environmentfile['content'] | b64decode | regex_search('HMPPS_ROLE=\".*\"') | regex_replace('HMPPS_ROLE=\"(.*)\"','\\1') }}"
 
+    - name: Show It
+      debug:
+         msg: "Env: {{ hmpps_environment }} Role: {{ hmpps_role }}"
+
     - name: Get Patch Information for Primary
       include_vars: "~/.hmpps-env-configs/{{ hmpps_environment }}/ansible/group_vars/{{ hmpps_role }}_primarydb.yml"
       when: database_type == "primary"
