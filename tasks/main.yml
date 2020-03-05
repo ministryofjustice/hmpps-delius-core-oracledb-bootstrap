@@ -216,6 +216,19 @@
     - hugepages_set|bool
     - not ready_for_ha|bool
 
+
+- name: (main) Display database_bootstrap_restore var 2
+  debug:
+    msg:
+      - "database_type - {{database_type}}"
+      - "database_bootstrap_restore - {{database_bootstrap_restore}}"
+      - "backup_restored - {{backup_restored}}"
+      - "grid_installed - {{grid_installed}}"
+      - "oradb_installed - {{oradb_installed}}"
+      - "patches_applied - {{patches_applied}}"
+    verbosity: 2
+  tags: always
+
 # Install all one-off patches specified for this environment
 - block:
     - name: (main) Get Environment Configuration
