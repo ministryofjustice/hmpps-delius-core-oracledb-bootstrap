@@ -258,7 +258,7 @@
       become_user: oracle
   when:
     - grid_installed|bool
-    - oradb_installed|bool
+    - oradb_installed|bool or database_type == "standby"
     - patches_applied|bool
     - backup_restored|bool or not (database_bootstrap_restore|bool)
 
