@@ -273,5 +273,5 @@
     - grid_installed|bool
     - oradb_installed|bool
     - patches_applied|bool
-    - backup_restored|bool or not database_bootstrap_restore|bool
-    - hugepages_set|bool
+    - backup_restored|bool or not (database_bootstrap_restore|bool)
+
