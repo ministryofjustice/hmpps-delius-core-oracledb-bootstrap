@@ -254,6 +254,7 @@
              install_absent_patches: true
              target_host: localhost
              environment_name: "{{ hmpps_environment }}"
+             config_vars: "~/.hmpps-env-configs/ansible/group_vars/all.yml"
       become: true
       become_user: oracle
 
