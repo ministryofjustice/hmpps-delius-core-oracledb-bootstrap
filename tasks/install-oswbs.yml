@@ -26,6 +26,7 @@
   debug:
     msg: "{{ argfile }}"
 
+# Ignore "1" as error code when running locally
 - name: (main/install-osbws) Install Oracle Secure Backup Web Service
   shell: |
           . /home/{{ service_user_name }}/.bash_profile && \
@@ -34,7 +35,7 @@
   become: true
   become_user: "{{ service_user_name }}"
   register: install
-  failed_when: install.rc !=0
+  failed_when: install.rc !=0 and install.rc !=1
   when: argfile.changed or osbws_ora_file.stat.exists == false
 
 - name: (main/install-osbws) Extract Oracle DB backups S3 bucket name from arn
