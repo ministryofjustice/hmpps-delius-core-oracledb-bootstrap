@@ -20,13 +20,13 @@
   set_fact:
     hmpps_role: "{{ environmentfile['content'] | b64decode | regex_search('HMPPS_ROLE=\".*\"') | regex_replace('HMPPS_ROLE=\"(.*)\"','\\1') }}"
 
-- name: Get Patch Information for Primary
+- name: Get Environment Specific Variables for Primary
   include_vars: "~/.hmpps-env-configs/{{ hmpps_environment }}/ansible/group_vars/{{ hmpps_role }}_primarydb.yml"
   when: database_type == "primary"
 
-- name: Get Patch Information for Standby (either will do as patches should be identical)
+- name: Get Environment Specific Variables for Standby (either will do as patches should be identical)
   include_vars: "~/.hmpps-env-configs/{{ hmpps_environment }}/ansible/group_vars/{{ hmpps_role }}_standbydb1.yml"
   when: database_type == "standby"
 
-- name: Get Patch Information for All Hosts
+- name: Get Environment Specific Variables for All Hosts
   include_vars: "~/.hmpps-env-configs/{{ hmpps_environment }}/ansible/group_vars/all.yml"
