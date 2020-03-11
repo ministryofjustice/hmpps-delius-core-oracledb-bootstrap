@@ -23,6 +23,9 @@
 # - name: (main) Get our instance facts
 #   ec2_metadata_facts:
 #   tags: always
+- name: Only for local running
+  setfact:
+    ansible_ec2_instance_identity_document_region: DONOTUSE
 
 - name: (main) Display database type
   debug:
