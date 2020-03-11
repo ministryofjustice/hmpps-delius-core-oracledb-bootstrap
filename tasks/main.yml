@@ -43,9 +43,22 @@
   include: reconfigure-instance.yml
   tags: always
 
+# DEBUG
+- name: (main) What is database_global_database_name
+  debug:
+     msg: "DB: {{ database_global_database_name }}  TAF:   {{ database_taf_service}}   UNIQ: {{ database_primary_unique}}"
+
+
+
 - name: (main) Get environment-specific configuration variables
   include: get-env-config.yml
   tags: always
+
+# DEBUG
+- name: (main) What is database_global_database_name
+  debug:
+     msg: "DB: {{ database_global_database_name }}  TAF:   {{ database_taf_service}}   UNIQ: {{ database_primary_unique}}"
+
 
 - block:
     - name: (main) Configure and startup asm
@@ -62,6 +75,13 @@
 
   when: not grid_installed|default(false)
   tags: asm
+
+# DEBUG
+- name: (main) What is database_global_database_name
+  debug:
+     msg: "DB: {{ database_global_database_name }}  TAF:   {{ database_taf_service}}   UNIQ: {{ database_primary_unique}}"
+
+
 
 - block:
     - name: (main) Configure out database
@@ -109,6 +129,11 @@
     - grid_installed|default(false)
     - not patches_applied|default(false)
   tags: patch
+
+# DEBUG
+- name: (main) What is database_global_database_name
+  debug:
+     msg: "DB: {{ database_global_database_name }}  TAF:   {{ database_taf_service}}   UNIQ: {{ database_primary_unique}}"
 
 
 - name: (main) Setup TAF Service Name
