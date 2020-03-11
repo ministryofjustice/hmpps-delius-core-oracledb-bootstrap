@@ -8,7 +8,7 @@
 
 - name: (main/install-osbws) Set fact instance_profile
   set_fact:
-    instance_profile: "{{ ansible_ec2_iam_instance_profile_role | regex_replace('_.*') | default('UNSET') }}"
+    instance_profile: "{{ ansible_ec2_iam_instance_profile_role | default('UNSET') | regex_replace('_.*') }}"
 
 - name: (main/install-osbws) debug instance_profile
   debug:
