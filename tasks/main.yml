@@ -5,6 +5,11 @@
     file: main.yml
   tags: always
 
+# DEBUG
+- name: (main) What is database_global_database_name
+  debug:
+     msg: "DB: {{ database_global_database_name }}  TAF:   {{ database_taf_service}}   UNIQ: {{ database_primary_unique}}"
+
 - block:
     - name: (main) Define our service user
       set_fact:
