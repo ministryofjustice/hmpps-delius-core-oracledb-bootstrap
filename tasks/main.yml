@@ -112,9 +112,15 @@
     - database_type != "standby"
   tags: service
 
+- name: Debug Chunk
+  debug: var=oracle_osbws_chunk_size
+
 - name: (main) Get environment-specific configuration variables
   include: get-env-config.yml
   tags: always
+
+- name: Debug Chunk
+  debug: var=oracle_osbws_chunk_size
 
 - block:
     - name: (main) Install Oracle Secure Web Backup Service (oswbs)

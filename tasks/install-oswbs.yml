@@ -48,6 +48,8 @@
     regexp: '^OSB_WS_BUCKET='
     line: "OSB_WS_BUCKET={{ oracledb_backups_bucket_name }}"
 
+- name: Debug Chunk
+  debug: var=oracle_osbws_chunk_size
 
 - name: (main/install-osbws) Set OSB_WS_CHUNK_SIZE
   lineinfile:
