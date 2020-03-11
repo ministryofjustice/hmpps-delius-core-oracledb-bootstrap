@@ -47,7 +47,9 @@
     regexp: '^OSB_WS_BUCKET='
     line: "OSB_WS_BUCKET={{ oracledb_backups_bucket_name }}"
 
-
+# It is possible to override the default value of OSB_WS_CHUNK_SIZE by
+# setting oracle_osbws_chunk_size in the appropriate file within hmpps-env-config
+# For example: delius-core-dev\ansible\group_vars\delius_primarydb.yml
 - name: (main/install-osbws) Set OSB_WS_CHUNK_SIZE
   lineinfile:
     path: "{{ oracle_osbws_ora_file }}"

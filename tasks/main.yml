@@ -100,13 +100,16 @@
     - not patches_applied|default(false)
   tags: patch
 
-
 - name: (main) Setup TAF Service Name
   include: set-taf-service.yml
   when:
     - grid_installed|default(false)
     - database_type != "standby"
   tags: service
+
+- name: (main) Get environment-specific configuration variables
+  include: get-env-config.yml
+  tags: always
 
 - block:
     - name: (main) Install Oracle Secure Web Backup Service (oswbs)
@@ -213,58 +216,26 @@
     - hugepages_set|bool
     - not ready_for_ha|bool
 
-
 # Install all one-off patches specified for this environment
+# become_user is ignored for an include, so attach it to the block instead
 - block:
-    - name: (main) Get Environment Configuration
-      git:
-         repo: 'https://github.com/ministryofjustice/hmpps-env-configs'
-         dest: ~/.hmpps-env-configs
-
-    - name: Slurp Environment File to Get This Hosts Configuration
-      slurp:
-          src: /etc/environment
-      register: environmentfile
-
-    - name: Set Current Environment
-      set_fact:
-        hmpps_environment: "{{ environmentfile['content'] | b64decode | regex_search('HMPPS_ENVIRONMENT=\".*\"') | regex_replace('HMPPS_ENVIRONMENT=\"(.*)\"','\\1') }}"
-
-    - name: Set Current Role
-      set_fact:
-        hmpps_role: "{{ environmentfile['content'] | b64decode | regex_search('HMPPS_ROLE=\".*\"') | regex_replace('HMPPS_ROLE=\"(.*)\"','\\1') }}"
-
-    - name: Get Patch Information for Primary
-      include_vars: "~/.hmpps-env-configs/{{ hmpps_environment }}/ansible/group_vars/{{ hmpps_role }}_primarydb.yml"
-      when: database_type == "primary"
-
-    - name: Get Patch Information for Standby (either will do as patches should be identical)
-      include_vars: "~/.hmpps-env-configs/{{ hmpps_environment }}/ansible/group_vars/{{ hmpps_role }}_standbydb1.yml"
-      when: database_type == "standby"
-
-    - name: Get Patch Information for All if Host Specific Configuration Not Found
-      include_vars: "~/.hmpps-env-configs/{{ hmpps_environment }}/ansible/group_vars/all.yml"
-      when: required_patches is not defined
-
-    - block:
-       - name: Install Patches
-         include_role:
-           name: oracle-db-patches
-         vars:
-             install_absent_patches: true
-             target_host: localhost
-             environment_name: "{{ hmpps_environment }}"
-             config_vars: "~/.hmpps-env-configs/ansible/group_vars/all.yml"
-      become: true
-      become_user: oracle
-
-    - name: Remove Environment Configuration Files (now finished with them)
-      file:
-         path: ~/.hmpps-env-configs
-         state: absent
+    - name: Install Patches
+      include_role:
+        name: oracle-db-patches
+      vars:
+          install_absent_patches: true
+          target_host: localhost
+          environment_name: "{{ hmpps_environment }}"
+          config_vars: "~/.hmpps-env-configs/ansible/group_vars/all.yml"
+  become: true
+  become_user: oracle
   when:
     - grid_installed|bool
     - oradb_installed|bool or database_type == "standby"
     - patches_applied|bool
     - backup_restored|bool or not (database_bootstrap_restore|bool)
 
+- name: Remove Environment Configuration Files (now finished with them)
+  file:
+      path: ~/.hmpps-env-configs
+      state: absent
