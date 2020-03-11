@@ -26,7 +26,6 @@
   debug:
     msg: "{{ argfile }}"
 
-# Ignore 1 as error code when running locally
 - name: (main/install-osbws) Install Oracle Secure Backup Web Service
   shell: |
           . /home/{{ service_user_name }}/.bash_profile && \
@@ -35,7 +34,7 @@
   become: true
   become_user: "{{ service_user_name }}"
   register: install
-  failed_when: install.rc !=0 and install.rc !=1
+  failed_when: install.rc !=0
   when: argfile.changed or osbws_ora_file.stat.exists == false
 
 - name: (main/install-osbws) Extract Oracle DB backups S3 bucket name from arn
@@ -48,9 +47,9 @@
     regexp: '^OSB_WS_BUCKET='
     line: "OSB_WS_BUCKET={{ oracledb_backups_bucket_name }}"
 
-- name: Debug Chunk
-  debug: var=oracle_osbws_chunk_size
-
+# It is possible to override the default value of OSB_WS_CHUNK_SIZE by
+# setting oracle_osbws_chunk_size in the appropriate file within hmpps-env-config
+# For example: delius-core-dev\ansible\group_vars\delius_primarydb.yml
 - name: (main/install-osbws) Set OSB_WS_CHUNK_SIZE
   lineinfile:
     path: "{{ oracle_osbws_ora_file }}"

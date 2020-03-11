@@ -19,14 +19,9 @@
   when: not service_user_group|default(false)
   tags: always
 
-# Not On Localhost
-# - name: (main) Get our instance facts
-#   ec2_metadata_facts:
-#   tags: always
-- name: Only for local running
-  set_fact:
-    ansible_ec2_instance_identity_document_region: eu-west-2
-    ansible_ec2_iam_instance_profile_role: dlc-dev-server-provison-ec2-role
+- name: (main) Get our instance facts
+  ec2_metadata_facts:
+  tags: always
 
 - name: (main) Display database type
   debug:
@@ -112,15 +107,9 @@
     - database_type != "standby"
   tags: service
 
-- name: Debug Chunk
-  debug: var=oracle_osbws_chunk_size
-
 - name: (main) Get environment-specific configuration variables
   include: get-env-config.yml
   tags: always
-
-- name: Debug Chunk
-  debug: var=oracle_osbws_chunk_size
 
 - block:
     - name: (main) Install Oracle Secure Web Backup Service (oswbs)
