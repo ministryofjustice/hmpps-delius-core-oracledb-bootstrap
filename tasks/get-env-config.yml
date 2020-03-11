@@ -28,4 +28,3 @@
 
 - name: Get Patch Information for All if Host Specific Configuration Not Found
   include_vars: "~/.hmpps-env-configs/{{ hmpps_environment }}/ansible/group_vars/all.yml"
-  when: required_patches is not defined
