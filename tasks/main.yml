@@ -25,7 +25,7 @@
 #   tags: always
 - name: Only for local running
   set_fact:
-    ansible_ec2_instance_identity_document_region: DONOTUSE
+    ansible_ec2_instance_identity_document_region: eu-west-2
 
 - name: (main) Display database type
   debug:
