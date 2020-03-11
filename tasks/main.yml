@@ -105,13 +105,16 @@
     - not patches_applied|default(false)
   tags: patch
 
-
 - name: (main) Setup TAF Service Name
   include: set-taf-service.yml
   when:
     - grid_installed|default(false)
     - database_type != "standby"
   tags: service
+
+- name: (main) Get environment-specific configuration variables
+  include: get-env-config.yml
+  tags: always
 
 - block:
     - name: (main) Install Oracle Secure Web Backup Service (oswbs)
@@ -217,10 +220,6 @@
     - backup_restored|bool
     - hugepages_set|bool
     - not ready_for_ha|bool
-
-- name: (main) Get environment-specific configuration variables
-  include: get-env-config.yml
-  tags: always
 
 # Install all one-off patches specified for this environment
 # become_user is ignored for an include, so attach it to the block instead
