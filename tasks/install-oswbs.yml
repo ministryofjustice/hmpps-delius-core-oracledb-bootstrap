@@ -26,7 +26,7 @@
   debug:
     msg: "{{ argfile }}"
 
-# Ignore "1" as error code when running locally
+# Ignore 1 as error code when running locally
 - name: (main/install-osbws) Install Oracle Secure Backup Web Service
   shell: |
           . /home/{{ service_user_name }}/.bash_profile && \
