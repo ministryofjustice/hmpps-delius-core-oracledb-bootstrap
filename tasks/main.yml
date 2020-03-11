@@ -25,7 +25,8 @@
 #   tags: always
 - name: Only for local running
   set_fact:
-    ansible_ec2_instance_identity_document_region: eu-west-2
+    - ansible_ec2_instance_identity_document_region: eu-west-2
+    - ansible_ec2_iam_instance_profile_role: dlc-dev-server-provison-ec2-role
 
 - name: (main) Display database type
   debug:
