@@ -28,5 +28,5 @@
   include_vars: "~/.hmpps-env-configs/{{ hmpps_environment }}/ansible/group_vars/{{ hmpps_role }}_standbydb1.yml"
   when: database_type == "standby"
 
-- name: Get Patch Information for All if Host Specific Configuration Not Found
+- name: Get Patch Information for All Hosts
   include_vars: "~/.hmpps-env-configs/{{ hmpps_environment }}/ansible/group_vars/all.yml"
