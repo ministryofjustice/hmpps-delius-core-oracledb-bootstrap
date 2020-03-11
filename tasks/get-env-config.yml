@@ -1,6 +1,5 @@
 ---
 
-# Version Number for Testing only
 - name: (main) Get Environment Configuration
   git:
       repo: 'https://github.com/ministryofjustice/hmpps-env-configs'
