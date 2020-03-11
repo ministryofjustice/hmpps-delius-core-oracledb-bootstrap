@@ -223,6 +223,7 @@
   tags: always
 
 # Install all one-off patches specified for this environment
+# become_user is ignored for an include, so attach it to the block instead
 - block:
     - name: Install Patches
       include_role:
@@ -232,8 +233,8 @@
           target_host: localhost
           environment_name: "{{ hmpps_environment }}"
           config_vars: "~/.hmpps-env-configs/ansible/group_vars/all.yml"
-      become: true
-      become_user: oracle
+  become: true
+  become_user: oracle
   when:
     - grid_installed|bool
     - oradb_installed|bool or database_type == "standby"
