@@ -1,9 +1,11 @@
 ---
 
+# Version Number for Testing only
 - name: (main) Get Environment Configuration
   git:
       repo: 'https://github.com/ministryofjustice/hmpps-env-configs'
       dest: ~/.hmpps-env-configs
+      version: ALS-52
 
 - name: Slurp Environment File to Get This Hosts Configuration
   slurp:
