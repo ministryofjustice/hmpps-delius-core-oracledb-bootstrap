@@ -46,9 +46,9 @@
   become_user: "{{ service_user_name }}"
   shell: "{{ oracle_grid_oracle_home }}/bin/netca -silent -responsefile /tmp/netca.rsp"
 
-- name: (main/reconfigure-asm) Calulate number of disks for volume groups
+- name: (main/reconfigure-asm) Calulate number of disks for volume groups - allow initial 10:6 DATA to FLASH ratio
   set_fact:
-    data_disks_quantity: "{{ asm_disks_quantity|int / 2 }}"
+    data_disks_quantity: "{{ 0.625 * asm_disks_quantity|int  }}"
     data_disk_list: []
     flash_disk_list: []
 
