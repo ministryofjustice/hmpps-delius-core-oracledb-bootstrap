@@ -111,13 +111,13 @@
   include: get-env-config.yml
   tags: always
 
-- block:
-    - name: (main) Install Oracle Secure Web Backup Service (oswbs)
-      include: install-oswbs.yml
-  when:
-    - grid_installed|bool
-    - patches_applied|bool
-  tags: oswbs
+# - block:
+#     - name: (main) Install Oracle Secure Web Backup Service (oswbs)
+#       include: install-oswbs.yml
+#   when:
+#     - grid_installed|bool
+#     - patches_applied|bool
+#   tags: oswbs
 
 - name: (main) Display database_bootstrap_restore var
   debug:
