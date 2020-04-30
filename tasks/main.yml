@@ -1,8 +1,15 @@
 ---
 
-- name: (main) Load in our vars
+- name: (main) Load in our vars for 11g database and 11g grid
   include_vars:
     file: main.yml
+  when: db_version is not defined
+  tags: always
+
+- name: (main) Load in our vars for {{ db_version }} database and 19c grid
+  include_vars:
+    file: main{{ db_version | default() }}.yml
+  when: db_version is defined
   tags: always
 
 - block:
@@ -39,7 +46,7 @@
 
 - block:
     - name: (main) Configure and startup asm
-      include: configure-asm.yml
+      include: configure-asm.yml  
 
     - name: (main) Create our check file so we don't run this again
       file:
@@ -76,8 +83,13 @@
     - name: (main) Install OPatch utility
       include: patch-oracle.yml
 
-    - name: (main) Install PSU patch
+    - name: (main) Install PSU patch for 11g database and 11g grid
       include: patch-psu.yml
+      when: db_version is not defined
+
+    - name: (main) Install PSU patch for {{ db_version }} database and 19c grid
+      include: patch-psu-{{ db_version }}.yml
+      when: db_version is defined
 
     - name: (main) Remove our patch source archive now we have patched
       file:
@@ -109,7 +121,7 @@
 
 - name: (main) Get environment-specific configuration variables
   include: get-env-config.yml
-  tags: always
+  #tags: always
 
 - block:
     - name: (main) Install Oracle Secure Web Backup Service (oswbs)
