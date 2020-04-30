@@ -86,5 +86,5 @@
       failed_when: sql_result.rc != 0
       become: true
       become_user: "{{ service_user_name }}"
-    when:
-      - database_type != "standby"
+      when:
+        - database_type != "standby"
