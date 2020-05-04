@@ -52,8 +52,8 @@
 
     - name: (main/patch-oracle) Backup Our OPatch Files
       archive:
-        path: "{{ oracle_database_oracle_home }}"
-        dest: "../{{ oracle_database_oracle_home }}/OPatch |basename + '-' + ansible_date_time.epoch }}.tar.gz"
+        path: "{{ oracle_database_oracle_home }}/OPatch"
+        dest: "{{ oracle_database_oracle_home }} |basename + '-' + ansible_date_time.epoch }}.tar.gz"
         remote_src: true
         remove: true
 
