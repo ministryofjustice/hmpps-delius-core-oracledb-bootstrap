@@ -1,5 +1,25 @@
 ---
 
+- block:
+    - name: (main) Find db version file
+      find:
+        path: "~/"
+        patterns: ".db_version"
+        hidden: yes
+      register: find_db_version_file
+
+    - block:
+      - name: (main) Output db version file
+        shell: cat ~/.db_version
+        register: db_version_output
+
+      - name: (main) Set fact for db version
+        set_fact:
+          db_version: "{{ db_version_output.stdout }}"
+        when: db_version_output.stdout | length > 0
+      when: find_db_version_file.matched == 1  
+  tags: always
+
 - name: (main) Load in our vars for 11g database and 11g grid
   include_vars:
     file: main.yml
@@ -28,7 +48,7 @@
 
 - name: (main) Get our instance facts
   ec2_metadata_facts:
-  tags: always
+  tags: alwayschangethisbackafterwards
 
 - name: (main) Display database type
   debug:
@@ -42,7 +62,7 @@
 
 - name: (main) Reconfigure our config that was set during ami build
   include: reconfigure-instance.yml
-  tags: always
+  tags: alwayschangethisbackafterwards
 
 - block:
     - name: (main) Configure and startup asm
