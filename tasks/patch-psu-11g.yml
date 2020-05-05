@@ -8,6 +8,23 @@
 
 - block:
 
+    - block:
+
+        - name: (main/patch-psu) Check status from primary database
+          shell: ". ~/.bash_profile && srvctl status database -d {{ database_sid }}"
+          register: database_status
+
+        - name: (main/patch-psu) Shutdown primary database before applying patches
+          shell: ". ~/.bash_profile && srvctl stop database -d {{ database_sid }} -o immediate"
+          when: '"Database is running" in database_status.stdout'
+          register: database_shutdown
+
+      become: true
+      become_user: "{{ service_user_name }}"  
+      when:
+        - oradb_installed
+        - database_type != 'standby'
+
     - name: (main/patch-psu) Apply Composite patch 27338049
       raw: "export PATH=$PATH:/tmp;
               {{ oracle_database_oracle_home }}/OPatch/opatch napply {{ oracle_patch_installer_directory }}/27726505/27475913/27338049
@@ -17,6 +34,7 @@
       failed_when: "'Composite patch 27338049 successfully applied.' not in patch_result.stdout_lines"
       become: true
       become_user: "{{ service_user_name }}"
+      ignore_errors: yes
 
     - name: (main/patch-psu) Apply OPatch 27441052/custom/server/27441052
       raw: "export PATH=$PATH:/tmp;
@@ -27,10 +45,14 @@
       failed_when: "'OPatch succeeded.' not in patch_result.stdout_lines"
       become: true
       become_user: "{{ service_user_name }}"
+      ignore_errors: yes
 
     - name: (main/patch-psu) Upgrade PSU in database
-      raw: ". ~/.bash_profile;
-              sqlplus '/ as sysdba' @{{ oracle_database_oracle_home }}/rdbms/admin/catbundle psu apply"
+      shell: |
+        . ~/.bash_profile
+        srvctl start database -d {{ database_sid }}
+        sqlplus '/ as sysdba' @{{ oracle_database_oracle_home }}/rdbms/admin/catbundle psu apply
+        exit;
       register: sql_result
       failed_when: sql_result.rc != 0
       become: true
@@ -39,9 +61,10 @@
         - database_type != "standby"
 
     - name: (main/patch-psu) Compile invalid database objects and shutdown
-      raw: ". ~/.bash_profile;
-              sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/rdbms/admin/utlrp;
-              echo -e 'shutdown immediate-\n' | sqlplus '/ as sysdba'"
+      shell: |
+        . ~/.bash_profile;
+        sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/rdbms/admin/utlrp
+        srvctl stop database -d {{ database_sid }}
       register: sql_result
       failed_when: sql_result.rc != 0
       become: true
@@ -65,13 +88,18 @@
       failed_when: "'OPatch succeeded.' not in patch_result.stdout_lines"
       become: true
       become_user: "{{ service_user_name }}"
+      ignore_errors: yes
 
     - name: (main/patch-psu) Upgrade OJVM in database
-      raw: ". ~/.bash_profile;
-            echo -e 'startup upgrade\n' | sqlplus '/ as sysdba';
-            sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/sqlpatch/27475598/postinstall.sql;
-            echo -e 'shutdown immediate\n' | sqlplus '/ as sysdba';
-            echo -e 'startup\n'| sqlplus '/ as sysdba'"
+      shell: 
+        cmd: |
+          . ~/.bash_profile
+          sqlplus / as sysdba << EOF
+          startup upgrade;
+          @{{ oracle_database_oracle_home}}/sqlpatch/27475598/postinstall.sql;
+          shutdown immediate;
+          startup;
+          EOF
       register: sql_result
       failed_when: sql_result.rc != 0
       become: true
@@ -79,7 +107,7 @@
       when:
         - database_type != "standby"
 
-    - name: (main/patch-psu) Compile invalid database objects and shutdown
+    - name: (main/patch-psu) Compile invalid database objects
       shell: ". ~/.bash_profile;
               sqlplus '/ as sysdba' @{{ oracle_database_oracle_home}}/rdbms/admin/utlrp"
       register: sql_result
