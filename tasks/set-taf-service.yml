@@ -2,7 +2,7 @@
   shell: |
     . ~/.bash_profile
     ORAENV_ASK=NO
-    ORACLE_SID=+ASM
+    ORACLE_SID={{ database_primary_unique }} 
     . oraenv
     srvctl status service -d {{ database_primary_unique}} -s {{ database_taf_service}} > /dev/null
     if [ $? -ne 0 ]
