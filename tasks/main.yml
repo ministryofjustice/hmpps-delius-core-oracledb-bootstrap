@@ -48,7 +48,7 @@
 
 - name: (main) Get our instance facts
   ec2_metadata_facts:
-  tags: alwayschangethisbackafterwards
+  tags: always
 
 - name: (main) Display database type
   debug:
@@ -62,7 +62,7 @@
 
 - name: (main) Reconfigure our config that was set during ami build
   include: reconfigure-instance.yml
-  tags: alwayschangethisbackafterwards
+  tags: always
 
 - block:
     - name: (main) Configure and startup asm
@@ -141,7 +141,7 @@
 
 - name: (main) Get environment-specific configuration variables
   include: get-env-config.yml
-  #tags: always
+  tags: always
 
 - block:
     - name: (main) Install Oracle Secure Web Backup Service (oswbs)
@@ -266,6 +266,7 @@
     - oradb_installed|bool or database_type == "standby"
     - patches_applied|bool
     - backup_restored|bool or not (database_bootstrap_restore|bool)
+    - db_version is not defined
 
 - name: Remove Environment Configuration Files (now finished with them)
   file:
