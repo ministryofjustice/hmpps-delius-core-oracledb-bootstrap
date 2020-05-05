@@ -266,7 +266,6 @@
     - oradb_installed|bool or database_type == "standby"
     - patches_applied|bool
     - backup_restored|bool or not (database_bootstrap_restore|bool)
-    - db_version is not defined
 
 - name: Remove Environment Configuration Files (now finished with them)
   file:
