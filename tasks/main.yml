@@ -1,5 +1,16 @@
 ---
 
+# Skip a couple of bootstrap steps if not running in AWS (to allow for local testing)
+- name: Check if inside AWS.
+  uri:
+    url: http://169.254.169.254/latest/meta-data
+    timeout: 2
+  register: aws_uri_check
+  failed_when: False
+
+- set_fact:
+    is_aws_environment: "{{ aws_uri_check.status == 200 }}"
+
 - block:
     - name: (main) Find db version file
       find:
@@ -48,6 +59,7 @@
 
 - name: (main) Get our instance facts
   ec2_metadata_facts:
+  when: is_aws_environment|bool
   tags: always
 
 - name: (main) Display database type
@@ -149,6 +161,7 @@
   when:
     - grid_installed|bool
     - patches_applied|bool
+    - is_aws_environment|bool
   tags: oswbs
 
 - name: (main) Display database_bootstrap_restore var
