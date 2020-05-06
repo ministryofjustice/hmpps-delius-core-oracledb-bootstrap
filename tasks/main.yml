@@ -1,8 +1,35 @@
 ---
 
-- name: (main) Load in our vars
+- block:
+    - name: (main) Find db version file
+      find:
+        path: "~/"
+        patterns: ".db_version"
+        hidden: yes
+      register: find_db_version_file
+
+    - block:
+      - name: (main) Output db version file
+        shell: cat ~/.db_version
+        register: db_version_output
+
+      - name: (main) Set fact for db version
+        set_fact:
+          db_version: "{{ db_version_output.stdout }}"
+        when: db_version_output.stdout | length > 0
+      when: find_db_version_file.matched == 1  
+  tags: always
+
+- name: (main) Load in our vars for 11g database and 11g grid
   include_vars:
     file: main.yml
+  when: db_version is not defined
+  tags: always
+
+- name: (main) Load in our vars for {{ db_version }} database and 19c grid
+  include_vars:
+    file: main{{ db_version | default() }}.yml
+  when: db_version is defined
   tags: always
 
 - block:
@@ -39,7 +66,7 @@
 
 - block:
     - name: (main) Configure and startup asm
-      include: configure-asm.yml
+      include: configure-asm.yml  
 
     - name: (main) Create our check file so we don't run this again
       file:
@@ -76,8 +103,13 @@
     - name: (main) Install OPatch utility
       include: patch-oracle.yml
 
-    - name: (main) Install PSU patch
+    - name: (main) Install PSU patch for 11g database and 11g grid
       include: patch-psu.yml
+      when: db_version is not defined
+
+    - name: (main) Install PSU patch for {{ db_version }} database and 19c grid
+      include: patch-psu-{{ db_version }}.yml
+      when: db_version is defined
 
     - name: (main) Remove our patch source archive now we have patched
       file:
