@@ -4,9 +4,9 @@
 - name: Check if inside AWS.
   uri:
     url: http://169.254.169.254/latest/meta-data
-    timeout: 2
+    timeout: 20
   register: aws_uri_check
-  failed_when: False
+  failed_when: false
 
 - set_fact:
     is_aws_environment: "{{ aws_uri_check.status == 200 }}"
@@ -262,8 +262,10 @@
     - not ready_for_ha|bool
 
 # Install all one-off patches specified for this environment
+# and set any custom database parameters
 # become_user is ignored for an include, so attach it to the block instead
 - block:
+
     - name: Install Patches
       include_role:
         name: oracle-db-patches
@@ -272,6 +274,13 @@
           target_host: localhost
           environment_name: "{{ hmpps_environment }}"
           config_vars: "~/.hmpps-env-configs/ansible/group_vars/all.yml"
+
+    - name: Set Database Custom Parameters
+      include_role:
+        name: oracle-db-parameters
+      vars:
+          target_host: localhost
+
   become: true
   become_user: oracle
   when:
