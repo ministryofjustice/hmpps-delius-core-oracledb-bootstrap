@@ -68,8 +68,8 @@
   shell: "{{ oracle_grid_oracle_home }}/bin/asmca
           -silent
           -configureASM
-          -sysAsmPassword {{ sys_asm_password|default('d3l1u5ag41n') }}
-          -asmsnmpPassword {{ snmp_asm_password|default('d3l1u5ag41n') }}
+          -sysAsmPassword {{ oradb_sys_password|default('d3l1u5ag41n') }}
+          -asmsnmpPassword {{ oradb_asmsnmp_password|default('d3l1u5ag41n') }}
           -diskString '/dev/oracleasm/disks/ASMDISK*'
           -diskGroupName DATA 
           -redundancy EXTERNAL
@@ -86,3 +86,14 @@
           -redundancy EXTERNAL
           -diskList {{ flash_disk_list | join(',') }}"
   register: flash_asm_result
+
+- name: (main/reconfigure-asm) Grant sysasm privilege to asmsnmp monitoring user
+  become: yes
+  become_user: "{{ service_user_name }}"
+  shell: |
+    . ~/.bash_profile
+    ORACLE_SID=+ASM
+    ORAENV_ASK=NO
+    . oraenv > /dev/null
+    {{ oracle_grid_oracle_home }}/bin/asmcmd orapwusr --modify --privilege sysasm asmsnmp
+  register: asmsnmp_modify
