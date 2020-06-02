@@ -275,11 +275,17 @@
           environment_name: "{{ hmpps_environment }}"
           config_vars: "~/.hmpps-env-configs/ansible/group_vars/all.yml"
 
+    
+    # Do not set Standby Database Parameters at Boot time as database will
+    # not exist at this point.   Any custom parameters will be applied
+    # to standby later when it is cloned from the primary.
     - name: Set Database Custom Parameters
       include_role:
         name: oracle-db-parameters
       vars:
           target_host: localhost
+      when:
+         - database_type != "standby"
 
   become: true
   become_user: oracle
