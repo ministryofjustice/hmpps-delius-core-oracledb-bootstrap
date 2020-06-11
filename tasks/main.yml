@@ -275,7 +275,6 @@
           environment_name: "{{ hmpps_environment }}"
           config_vars: "~/.hmpps-env-configs/ansible/group_vars/all.yml"
 
-    
     # Do not set Standby Database Parameters at Boot time as database will
     # not exist at this point.   Any custom parameters will be applied
     # to standby later when it is cloned from the primary.
@@ -286,6 +285,16 @@
           target_host: localhost
       when:
          - database_type != "standby"
+
+   # Only need to schedule database autotasks on Primary Database
+   # (Defaults will be kept if not configured in hmpps-env-configs)
+    - name: Schedule Database Autotasks
+      include_role:
+        name: oracle-db-autotasks
+      vars:
+          target_host: localhost
+      when:
+         - database_type == "primary"
 
   become: true
   become_user: oracle
