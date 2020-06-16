@@ -4,6 +4,7 @@
   git:
       repo: 'https://github.com/ministryofjustice/hmpps-env-configs'
       dest: ~/.hmpps-env-configs
+      version: LOCAL
    
 - name: Slurp Environment File to Get This Hosts Configuration
   slurp:
