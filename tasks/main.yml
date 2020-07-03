@@ -7,9 +7,11 @@
     timeout: 20
   register: aws_uri_check
   failed_when: false
+  tags: always
 
 - set_fact:
     is_aws_environment: "{{ aws_uri_check.status == 200 }}"
+  tags: always
 
 - block:
     - name: (main) Find db version file
@@ -119,9 +121,9 @@
       include: patch-psu.yml
       when: db_version is not defined
 
-    - name: (main) Install PSU patch for {{ db_version }} database and 19c grid
-      include: patch-psu-{{ db_version }}.yml
-      when: db_version is defined
+    - name: (main) Install PSU patch for 11g database only (with 19c grid)
+      include: patch-psu-11g.yml
+      when: db_version is defined and db_version == '11g'
 
     - name: (main) Remove our patch source archive now we have patched
       file:
@@ -129,6 +131,7 @@
         state: absent
       with_items:
         - "{{ oracle_patch_installer_directory }}/p6880880_112000_Linux-x86-64.zip"
+      when: db_version is not defined or (db_version is defined and db_version == '11g')
 
     - name: (main) Create our check file so we don't run this again
       file:
