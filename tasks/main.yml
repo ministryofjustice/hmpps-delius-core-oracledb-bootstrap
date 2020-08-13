@@ -260,8 +260,6 @@
     - grid_installed|bool
     - oradb_installed|bool
     - patches_applied|bool
-    - backup_restored|bool
-    - hugepages_set|bool
     - not ready_for_ha|bool
 
 # Install all one-off patches specified for this environment
