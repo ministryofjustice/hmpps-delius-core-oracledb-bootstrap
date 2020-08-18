@@ -1,6 +1,8 @@
 ---
 
-
+- name: (main/reconfigure-asm) Set Oracle Grid Version
+  set_fact:
+      oracle_grid_version: "{{ oracle_grid_oracle_home | regex_replace('^.+/product/([\\d\\.]+)/grid$','\\1') }}"
 
 - name: Ensure our asm discovery template is on the system in roots home directory and is executable
   copy:
@@ -87,7 +89,7 @@
           -diskList {{ flash_disk_list | join(',') }}"
   register: flash_asm_result
 
-- name: (main/reconfigure-asm) Grant sysasm privilege to asmsnmp monitoring user
+- name: (main/reconfigure-asm) Grant sysasm privilege to asmsnmp monitoring user (GI Versions below 12c)
   become: yes
   become_user: "{{ service_user_name }}"
   shell: |
@@ -97,3 +99,16 @@
     . oraenv > /dev/null
     {{ oracle_grid_oracle_home }}/bin/asmcmd orapwusr --modify --privilege sysasm asmsnmp
   register: asmsnmp_modify
+  when: oracle_grid_version is version('12','lt')
+
+- name: (main/reconfigure-asm) Grant sysasm privilege to asmsnmp monitoring user (GI Versions 12c and above)
+  become: yes
+  become_user: "{{ service_user_name }}"
+  shell: |
+    . ~/.bash_profile
+    ORACLE_SID=+ASM
+    ORAENV_ASK=NO
+    . oraenv > /dev/null
+    {{ oracle_grid_oracle_home }}/bin/asmcmd orapwusr --grant sysasm ASMSNMP
+  register: asmsnmp_modify
+  when: oracle_grid_version is version('12','ge')
