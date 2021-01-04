@@ -532,7 +532,7 @@ restore_db_passwords () {
   . /etc/environment
 
   PRODUCT=`echo $HMPPS_ROLE`
-  SYSTEMDBUSERS=(sys system sysman dbsnmp)
+  SYSTEMDBUSERS=(sys system dbsnmp)
   if [ "$PRODUCT" = "delius" ]
   then
     DBUSERS+=(delius_app_schema delius_pool )

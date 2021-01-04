@@ -14,7 +14,6 @@ Role Variables
     - database_type                 # whether it's a primary or standby, defaults to STANDALONE
     - oradb_sys_password            # defaults to d3l1u5ag41n
     - oradb_system_password         # defaults to d3l1u5ag41n
-    - oradb_sysman_password         # defaults to d3l1u5ag41n
     - oradb_dbsnmp_password         # defaults to d3l1u5ag41n
     - oradb_asmsnmp_password        # defaults to d3l1u5ag41n
     - database_characterset         # defaults to AL32UTF8
