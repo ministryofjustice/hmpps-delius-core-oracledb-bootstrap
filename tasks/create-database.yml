@@ -26,6 +26,6 @@
 
 - name: (main/create-database) Remove dbca response file after successful database creation
   file:
-    path: "/tmp/{{ oracle_dbca_response_file }}.rsp"
+    path: "/tmp/dbca{{ db_version }}.rsp"
     state: absent
   when: command_result.stdout is search("100%")
