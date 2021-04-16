@@ -1,19 +1,19 @@
 <?xml version = '1.0'?>
 <DatabaseTemplate name="General Purpose" description=" " version="19.0.0.0.0">
    <CommonAttributes>
-      <option name="OMS" value="true" includeInPDBs="true"/>
+      <option name="OMS" value="false" includeInPDBs="false"/>
       <option name="JSERVER" value="true" includeInPDBs="true"/>
-      <option name="SPATIAL" value="true" includeInPDBs="true"/>
-      <option name="IMEDIA" value="true" includeInPDBs="true"/>
-      <option name="ORACLE_TEXT" value="true" includeInPDBs="true">
+      <option name="SPATIAL" value="false" includeInPDBs="false"/>
+      <option name="IMEDIA" value="false" includeInPDBs="false"/>
+      <option name="ORACLE_TEXT" value="false" includeInPDBs="false">
          <tablespace id="SYSAUX"/>
       </option>
       <option name="SAMPLE_SCHEMA" value="false" includeInPDBs="false"/>
-      <option name="CWMLITE" value="true" includeInPDBs="true">
+      <option name="CWMLITE" value="false" includeInPDBs="false">
          <tablespace id="SYSAUX"/>
       </option>
       <option name="APEX" value="false" includeInPDBs="false"/>
-      <option name="DV" value="true" includeInPDBs="true"/>
+      <option name="DV" value="false" includeInPDBs="false"/>
    </CommonAttributes>
    <Variables/>
    <CustomScripts Execute="false"/>
