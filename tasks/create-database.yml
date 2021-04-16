@@ -2,8 +2,8 @@
 
 - name: (main/create-database) preparing database response template
   template:
-    src: "{{ role_path }}/templates/{{ oracle_dbca_response_file }}.rsp.j2"
-    dest: "/tmp/{{ oracle_dbca_response_file }}.rsp"
+    src: "{{ role_path }}/templates/dbca{{ db_version }}.rsp.j2"
+    dest: "/tmp/dbca{{ db_version }}.rsp"
     owner: "{{ service_user_name }}"
     mode: 0400
 
@@ -14,15 +14,9 @@
     owner: "{{ service_user_name }}"
     remote_src: true
 
-- name: Set fact for dbca parameters database version 11g
+- name: Set fact for dbca parameters database
   set_fact:
-    dbca_parameters: "-silent -responseFile /tmp/{{ oracle_dbca_response_file }}.rsp"
-  when: db_version is not defined or (db_version is defined and db_version == '11g')
-
-- name: Set fact for dbca parameters database version 18c
-  set_fact:
-    dbca_parameters: "-silent -createDatabase -responseFile /tmp/{{ oracle_dbca_response_file }}.rsp"
-  when: db_version is defined and db_version == '18c'
+    dbca_parameters: "-silent -createDatabase -responseFile /tmp/dbca{{ db_version }}.rsp"
 
 - name: (main/create-database) Run database configuration assistant
   shell: "{{ oracle_database_oracle_home }}/bin/dbca {{ dbca_parameters }}"
