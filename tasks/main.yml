@@ -113,40 +113,6 @@
     - database_type != "standby"
   tags: create_db
 
-- block:
-    - name: (main) Install OPatch utility
-      include: patch-oracle.yml
-
-    - name: (main) Install PSU patch for 11g database and 11g grid
-      include: patch-psu.yml
-      when: db_version is not defined
-
-    - name: (main) Install PSU patch for 11g database only (with 19c grid)
-      include: patch-psu-11g.yml
-      when: db_version is defined and db_version == '11g'
-
-    - name: (main) Remove our patch source archive now we have patched
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-        - "{{ oracle_patch_installer_directory }}/p6880880_112000_Linux-x86-64.zip"
-      when: db_version is not defined or (db_version is defined and db_version == '11g')
-
-    - name: (main) Create our check file so we don't run this again
-      file:
-        path: "/home/{{ service_user_name }}/.patches_applied"
-        state: touch
-
-    - name: (main) patches applied
-      set_fact:
-        patches_applied: true
-
-  when:
-    - grid_installed|default(false)
-    - not patches_applied|default(false)
-  tags: patch
-
 - name: (main) Setup TAF Service Name
   include: set-taf-service.yml
   when:
@@ -163,7 +129,6 @@
       include: install-oswbs.yml
   when:
     - grid_installed|bool
-    - patches_applied|bool
     - is_aws_environment|bool
   tags: oswbs
 
@@ -175,7 +140,6 @@
       - "backup_restored - {{backup_restored}}"
       - "grid_installed - {{grid_installed}}"
       - "oradb_installed - {{oradb_installed}}"
-      - "patches_applied - {{patches_applied}}"
     verbosity: 2
   tags: always
 
@@ -197,7 +161,6 @@
     - not backup_restored|bool
     - grid_installed|bool
     - oradb_installed|bool
-    - patches_applied|bool
   tags: restore
 
 - block:
@@ -247,7 +210,6 @@
   when:
     - database_type != "primary"
     - grid_installed|bool
-    - patches_applied|bool
     - not ready_for_ha|bool
 
 - block:
@@ -259,7 +221,6 @@
     - database_type != "standby"
     - grid_installed|bool
     - oradb_installed|bool
-    - patches_applied|bool
     - not ready_for_ha|bool
 
 # Install all one-off patches specified for this environment
@@ -302,7 +263,6 @@
   when:
     - grid_installed|bool
     - oradb_installed|bool or database_type == "standby"
-    - patches_applied|bool
     - backup_restored|bool or not (database_bootstrap_restore|bool)
 
 - name: Remove Environment Configuration Files (now finished with them)
