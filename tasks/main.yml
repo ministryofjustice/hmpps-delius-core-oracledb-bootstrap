@@ -223,6 +223,9 @@
     - oradb_installed|bool
     - not ready_for_ha|bool
 
+- name: Ensure Password File is in ASM
+  include_tasks: move_password_file_to_asm.yml
+
 # Install all one-off patches specified for this environment
 # and set any custom database parameters
 # become_user is ignored for an include, so attach it to the block instead
