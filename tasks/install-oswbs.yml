@@ -55,3 +55,12 @@
     path: "{{ oracle_osbws_ora_file }}"
     regexp: '^OSB_WS_CHUNK_SIZE='
     line: "OSB_WS_CHUNK_SIZE={{ oracle_osbws_chunk_size }}"
+
+# The OSBWS Installer will enable HTTP by Default.  We must set HTTPS
+# by editing the auto-generated configuration file
+- name: Use HTTPS to Secure Backup Traffic
+  lineinfile:
+      path: "{{ oracle_osbws_ora_file }}"
+      regexp: '^OSB_WS_HOST\s*=\s*http:(.*)$'
+      line: 'OSB_WS_HOST=https:\1'
+      backrefs: yes
