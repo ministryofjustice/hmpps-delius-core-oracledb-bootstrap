@@ -26,10 +26,17 @@
   debug:
     msg: "{{ argfile }}"
 
+- name: (main/install-osbws) Unzip Install JAR
+  unarchive:
+    src: "{{ oracle_database_oracle_home }}/lib/osbws_installer.zip"
+    dest: "{{ oracle_osbws_installer_directory }}"
+    creates: "{{ oracle_osbws_installer_directory }}/osbws_install.jar"
+    remote_src: yes
+
 - name: (main/install-osbws) Install Oracle Secure Backup Web Service
   shell: |
           . /home/{{ service_user_name }}/.bash_profile && \
-          java -verbose -jar {{ oracle_osbws_installer_directory }}/osbws_install_12.2.0.1.0.jar  \
+          java -verbose -jar {{ oracle_osbws_installer_directory }}/osbws_install.jar  \
           -ARGFILE {{ oracle_osbws_installer_directory }}/osbws-argfile
   become: true
   become_user: "{{ service_user_name }}"
