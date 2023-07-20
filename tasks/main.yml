@@ -7,11 +7,11 @@
     timeout: 20
   register: aws_uri_check
   failed_when: false
-  tags: always
+  tags: oracle-db-bootstrap
 
 - set_fact:
     is_aws_environment: "{{ aws_uri_check.status == 200 }}"
-  tags: always
+  tags: oracle-db-bootstrap
 
 - block:
     - name: (main) Find db version file
@@ -31,52 +31,52 @@
           db_version: "{{ db_version_output.stdout }}"
         when: db_version_output.stdout | length > 0
       when: find_db_version_file.matched == 1  
-  tags: always
+  tags: oracle-db-bootstrap
 
 - name: (main) Load in our vars for 11g database and 11g grid
   include_vars:
     file: main.yml
   when: db_version is not defined
-  tags: always
+  tags: oracle-db-bootstrap
 
 - name: (main) Load in our vars for {{ db_version }} database and 19c grid
   include_vars:
     file: main{{ db_version | default() }}.yml
   when: db_version is defined
-  tags: always
+  tags: oracle-db-bootstrap
 
 - block:
     - name: (main) Define our service user
       set_fact:
         service_user_name: "oracle"
   when: not service_user_name|default(false)
-  tags: always
+  tags: oracle-db-bootstrap
 
 - block:
     - name: (main) Define our service user's group
       set_fact:
         service_user_group: "oinstall"
   when: not service_user_group|default(false)
-  tags: always
+  tags: oracle-db-bootstrap
 
 - name: (main) Get our instance facts
   ec2_metadata_facts:
   when: is_aws_environment|bool
-  tags: always
+  tags: oracle-db-bootstrap
 
 - name: (main) Display database type
   debug:
     var: database_type
     verbosity: 1
-  tags: always
+  tags: oracle-db-bootstrap
 
 - name: (main) Gather installation facts
   include: check-installation.yml
-  tags: always
+  tags: oracle-db-bootstrap
 
 - name: (main) Reconfigure our config that was set during ami build
   include: reconfigure-instance.yml
-  tags: always
+  tags: oracle-db-bootstrap
 
 - block:
     - name: (main) Configure and startup asm
@@ -92,7 +92,7 @@
         grid_installed: true
 
   when: not grid_installed|default(false)
-  tags: asm
+  tags: oracle-db-bootstrap-asm
 
 - block:
     - name: (main) Configure out database
@@ -111,18 +111,18 @@
     - not oradb_installed|default(false)
     - grid_installed|default(false)
     - database_type != "standby"
-  tags: create_db
+  tags: oracle-db-bootstrap-create-db
 
 - name: (main) Setup TAF Service Name
   include: set-taf-service.yml
   when:
     - grid_installed|default(false)
     - database_type != "standby"
-  tags: service
+  tags: oracle-db-bootstrap-service
 
 - name: (main) Get environment-specific configuration variables
   include: get-env-config.yml
-  tags: always
+  tags: oracle-db-bootstrap
 
 - block:
     - name: (main) Install Oracle Secure Web Backup Service (oswbs)
@@ -130,7 +130,7 @@
   when:
     - grid_installed|bool
     - is_aws_environment|bool
-  tags: oswbs
+  tags: oracle-db-bootstrap-oswbs
 
 - name: (main) Display database_bootstrap_restore var
   debug:
@@ -141,7 +141,7 @@
       - "grid_installed - {{grid_installed}}"
       - "oradb_installed - {{oradb_installed}}"
     verbosity: 2
-  tags: always
+  tags: oracle-db-bootstrap
 
 - block:
     - name: (main) Restore Cold Backup
@@ -161,7 +161,7 @@
     - not backup_restored|bool
     - grid_installed|bool
     - oradb_installed|bool
-  tags: restore
+  tags: oracle-db-bootstrap-restore
 
 - block:
     - name: (main) Copy huge page script
@@ -200,7 +200,7 @@
     - database_type != "standby"
     - backup_restored|bool
     - not hugepages_set|bool
-  tags: hugepages
+  tags: oracle-db-bootstrap-hugepages
 
 - block:
     - name: (main) Create DB ready for HA check file standby
